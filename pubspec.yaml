@@ -46,6 +46,12 @@ dependencies:
   shared_preferences: ^2.5.6
   flutter_localizations:
     sdk: flutter
+  image_picker: ^1.2.4
+  printing: ^5.14.3
+  share_plus: ^13.3.1
+  # Transitive pin: image 4.11 needs archive >=4.1, but pdf (via printing) caps archive <4.1.
+  # Remove once pdf allows archive 4.1+.
+  image: ">=4.5.0 <4.11.0"
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +74,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/samples/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

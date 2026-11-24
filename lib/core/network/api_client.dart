@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
@@ -32,6 +33,16 @@ class ApiClient {
       );
 
   Future<Map<String, dynamic>> put(String path, {Object? body}) => _send(() => _dio.put<dynamic>(path, data: body));
+
+  /// Downloads a file (PDF, CSV…) as raw bytes.
+  Future<Uint8List> getBytes(String path, {Map<String, dynamic>? query}) async {
+    try {
+      final res = await _dio.get<List<int>>(path, queryParameters: query, options: Options(responseType: ResponseType.bytes));
+      return Uint8List.fromList(res.data ?? const []);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
 
   Future<Map<String, dynamic>> _send(Future<Response<dynamic>> Function() request) async {
     try {

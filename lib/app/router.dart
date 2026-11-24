@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/presentation/consent_screen.dart';
+import '../features/bills/presentation/bill_screen.dart';
+import '../features/gst/presentation/gst_screen.dart';
+import '../features/gst/presentation/invoice_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/session_controller.dart';
 import '../features/home/presentation/home_screen.dart';
@@ -59,6 +62,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(routes: [GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen())]),
         ],
       ),
+      // full-screen tasks opened from anywhere (back returns to where you were)
+      GoRoute(path: '/bill', builder: (_, _) => const BillScreen()),
+      GoRoute(path: '/gst', builder: (_, _) => const GstScreen()),
+      GoRoute(path: '/invoice/:id', builder: (_, state) => InvoiceScreen(id: state.pathParameters['id']!)),
       // old links from alerts and earlier builds
       GoRoute(path: '/stock', redirect: (_, _) => '/inventory'),
     ],

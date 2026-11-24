@@ -19,6 +19,8 @@ import '../../alerts/domain/alert_models.dart';
 import '../../inventory/presentation/inventory_screen.dart';
 import '../../inventory/presentation/inventory_text.dart';
 import '../../labour/presentation/labour_text.dart';
+import '../../bills/presentation/bill_text.dart';
+import '../../gst/presentation/gst_text.dart';
 import '../../voice/domain/voice_examples.dart';
 import '../data/home_repository.dart';
 import '../domain/home_models.dart';
@@ -51,7 +53,8 @@ class HomeScreen extends ConsumerWidget {
                 _FlowCard(flow: h.flow, strings: s),
                 if (h.labour.workers > 0) ...[const SizedBox(height: 14), _TeamCard(labour: h.labour, strings: s)],
                 const SizedBox(height: 14),
-                _SpeakBar(strings: s, example: VoiceExamples.forIndustry(h.producer.industry.key).first),
+                _InputTiles(strings: s, example: VoiceExamples.forIndustry(h.producer.industry.key).first),
+                if (h.gst.registered) ...[const SizedBox(height: 14), _GstCard(gst: h.gst, strings: s)],
               ],
             ),
           ),
@@ -146,6 +149,7 @@ class _AlertStrip extends ConsumerWidget {
             'LOW_STOCK' => (Icons.warning_amber_rounded, SutraColors.kumkum),
             'ORDER' => (Icons.shopping_bag_outlined, SutraColors.haldiDeep),
             'PAYMENT' => (Icons.currency_rupee_rounded, SutraColors.sindoor),
+            'GST' => (Icons.receipt_long_outlined, SutraColors.kumkum),
             _ => (Icons.info_outline_rounded, SutraColors.neel),
           };
           return ActionChip(
@@ -157,7 +161,13 @@ class _AlertStrip extends ConsumerWidget {
                 ? null
                 : () {
                     ref.read(alertRepositoryProvider).markRead(a.id);
-                    context.go(a.route == '/stock' ? '/inventory' : a.route!);
+                    final route = a.route == '/stock' ? '/inventory' : a.route!;
+                    // full-screen tasks open on top (back returns home); tabs switch in place
+                    if (route == '/gst' || route == '/bill') {
+                      context.push(route);
+                    } else {
+                      context.go(route);
+                    }
                   },
           );
         },
@@ -307,9 +317,9 @@ class _TeamCard extends StatelessWidget {
   }
 }
 
-/// A slim reminder that speaking is the fastest way in.
-class _SpeakBar extends StatelessWidget {
-  const _SpeakBar({required this.strings, required this.example});
+/// The two ways in that need no typing: speak, or photograph a bill.
+class _InputTiles extends StatelessWidget {
+  const _InputTiles({required this.strings, required this.example});
   final AppStrings strings;
 
   /// Something this producer's trade would actually say.
@@ -317,26 +327,88 @@ class _SpeakBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: _InputTile(color: SutraColors.neel, icon: Icons.mic_rounded, title: strings.speakCta, sub: '“$example”', onTap: () => context.go('/voice'))),
+        const SizedBox(width: 12),
+        Expanded(child: _InputTile(color: SutraColors.sindoor, icon: Icons.photo_camera_outlined, title: strings.tr(BillText.title), sub: strings.tr(BillText.subtitle), onTap: () => context.push('/bill'))),
+      ],
+    );
+  }
+}
+
+class _InputTile extends StatelessWidget {
+  const _InputTile({required this.color, required this.icon, required this.title, required this.sub, required this.onTap});
+  final Color color;
+  final IconData icon;
+  final String title;
+  final String sub;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
     return Material(
-      color: SutraColors.neel,
+      color: color,
       borderRadius: const BorderRadius.all(SutraRadius.lg),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: const BorderRadius.all(SutraRadius.lg),
-        onTap: () => context.go('/voice'),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          child: Row(
-            children: [
-              const Icon(Icons.mic_rounded, color: Colors.white),
-              const SizedBox(width: 12),
-              Text(strings.speakCta, style: SutraType.display(17, color: Colors.white)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text('“$example”', textAlign: TextAlign.end, maxLines: 1, style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 12), overflow: TextOverflow.ellipsis),
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(icon, color: Colors.white, size: 28),
+                  const SizedBox(height: 10),
+                  Text(title, style: SutraType.display(17, color: Colors.white)),
+                  const SizedBox(height: 2),
+                  Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 12)),
+                ],
               ),
-            ],
-          ),
+            ),
+            const ThreadStripe(height: 3),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+/// This month's GST in one glance: what goes to the government, and whether anything needs fixing.
+class _GstCard extends StatelessWidget {
+  const _GstCard({required this.gst, required this.strings});
+  final HomeGst gst;
+  final AppStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = strings;
+    return _Card(
+      onTap: () => context.push('/gst'),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(color: SutraColors.sindoorWash, shape: BoxShape.circle),
+            child: const Text('GST', style: TextStyle(color: SutraColors.sindoorDeep, fontWeight: FontWeight.w800)),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${s.tr(GstText.payable)} · ${gst.period}', style: Theme.of(context).textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                AmountText(gst.due, size: 22, incoming: false),
+              ],
+            ),
+          ),
+          Stamp(gst.issues == 0 ? s.tr(GstText.allGood) : '${gst.issues} ${s.tr(GstText.fix)}', tone: gst.issues == 0 ? Tone.ok : Tone.critical, size: 10),
+        ],
       ),
     );
   }

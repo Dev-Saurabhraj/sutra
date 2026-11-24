@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/l10n/app_strings.dart';
@@ -9,6 +10,7 @@ import '../../../design/widgets/bits.dart';
 import '../../../design/widgets/ledger_card.dart';
 import '../../../design/widgets/thread_stripe.dart';
 import '../../auth/presentation/session_controller.dart';
+import '../../gst/presentation/gst_text.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -59,6 +61,12 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/gst'),
+                icon: const Icon(Icons.receipt_long_outlined),
+                label: Text(s.tr(GstText.title)),
               ),
             ],
             SectionHeader(s.language),

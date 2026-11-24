@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/format/formatters.dart';
@@ -149,6 +150,12 @@ class _RawView extends ConsumerWidget {
           value: AmountText(flow.rawValue, size: 20),
           action: TextButton.icon(onPressed: () => showAddMaterialSheet(context), icon: const Icon(Icons.add_rounded), label: Text(strings.tr(InvText.addMaterial))),
         ),
+        OutlinedButton.icon(
+          onPressed: () => context.push('/bill'),
+          icon: const Icon(Icons.photo_camera_outlined, color: SutraColors.sindoor),
+          label: Text(strings.tr(InvText.fromBill)),
+        ),
+        const SizedBox(height: 10),
         LedgerCard(
           padding: const EdgeInsets.fromLTRB(34, 4, 12, 4),
           child: Column(

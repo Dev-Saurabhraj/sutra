@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Sutra uses the camera to read your supplier bills.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Sutra reads supplier bills from your photos.</string>
 </dict>
 </plist>
