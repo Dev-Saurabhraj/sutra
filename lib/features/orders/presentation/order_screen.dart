@@ -16,6 +16,7 @@ import '../../../design/widgets/form_bits.dart';
 import '../../../design/widgets/ledger_card.dart';
 import '../../../design/widgets/product_thumb.dart';
 import '../../../design/widgets/stamp.dart';
+import '../../capacity/presentation/capacity_text.dart';
 import '../../gst/presentation/gst_text.dart';
 import '../../home/data/home_repository.dart';
 import '../data/order_repository.dart';
@@ -55,6 +56,7 @@ class OrderScreen extends ConsumerWidget {
                         padding: SutraSpace.page,
                         children: [
                           _Header(order: d.order, strings: s),
+                          if (d.group.isNotEmpty) ...[const SizedBox(height: 14), _SharedRequest(order: d.order, group: d.group, strings: s)],
                           if (d.plan != null) ...[const SizedBox(height: 14), _PlanCard(plan: d.plan!, strings: s)],
                           if (d.price != null && d.order.stage.index <= OrderStage.making.index) ...[
                             const SizedBox(height: 14),
@@ -136,6 +138,32 @@ class _Header extends StatelessWidget {
 }
 
 /// "Can I deliver?" answered with a picture first, then three numbers, then what to order.
+/// A buyer request shared across the cluster: this maker's part and who makes the rest.
+class _SharedRequest extends StatelessWidget {
+  const _SharedRequest({required this.order, required this.group, required this.strings});
+  final Order order;
+  final List<GroupPart> group;
+  final AppStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = strings;
+    final total = order.qty + group.fold(0, (a, g) => a + g.qty);
+    return LedgerCard(
+      padding: const EdgeInsets.fromLTRB(36, 10, 16, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('${s.tr(OrderText.sharedTitle)} · ${order.qty}/$total ${s.tr(OrderText.pieces)}', style: Theme.of(context).textTheme.titleSmall),
+          Text(s.tr(OrderText.sharedSub), style: Theme.of(context).textTheme.bodySmall),
+          for (final (i, g) in group.indexed)
+            LedgerLine(label: g.maker, sub: g.code, value: Text('${g.qty}', style: SutraType.figure(15)), last: i == group.length - 1),
+        ],
+      ),
+    );
+  }
+}
+
 class _PlanCard extends StatelessWidget {
   const _PlanCard({required this.plan, required this.strings});
   final DeliveryPlan plan;
@@ -176,6 +204,21 @@ class _PlanCard extends StatelessWidget {
               targetLabel: '${p.qty} ${s.tr(OrderText.pieces)}',
             ),
           Text(s.tr(OrderText.curveNote), style: text.labelSmall?.copyWith(color: SutraColors.inkSoft)),
+          if (p.counted.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(s.tr(CapText.counted), style: text.labelMedium?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Wrap(spacing: 6, runSpacing: 6, children: [for (final e in p.counted) DaysOffChip(event: e, strings: s)]),
+          ],
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 40)),
+              onPressed: () => context.push('/capacity'),
+              icon: const Icon(Icons.event_busy_outlined, size: 18),
+              label: Text(s.tr(CapText.add)),
+            ),
+          ),
           const SizedBox(height: 6),
           LedgerLine(label: s.tr(OrderText.readyNow), value: Text('${p.ready}', style: SutraType.figure(16))),
           LedgerLine(label: s.tr(OrderText.perDay), value: Text(Fmt.qty(p.perDay), style: SutraType.figure(16))),

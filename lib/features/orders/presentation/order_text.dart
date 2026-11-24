@@ -18,6 +18,10 @@ abstract final class OrderText {
   static const stageReached = T('पहुँचा', 'Reached');
   static const declined = T('मना किया', 'Declined');
 
+  // shared request (cluster split)
+  static const sharedTitle = T('मिलकर बनने वाली माँग', 'Shared request');
+  static const sharedSub = T('ख़रीदार ने यह माँग क्लस्टर के कई कारीगरों में बाँटी है। बाकी हिस्से:', 'The buyer split this request across the cluster. The other parts:');
+
   // can I deliver
   static const canDeliver = T('क्या समय पर दे पाएँगे?', 'Can you deliver in time?');
   static const yesInTime = T('हाँ, समय पर', 'Yes, in time');

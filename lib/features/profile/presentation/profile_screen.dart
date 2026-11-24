@@ -11,6 +11,7 @@ import '../../../design/widgets/ledger_card.dart';
 import '../../../design/widgets/thread_stripe.dart';
 import '../../auth/presentation/session_controller.dart';
 import '../../gst/presentation/gst_text.dart';
+import '../../capacity/presentation/capacity_text.dart';
 import '../../catalog/presentation/catalog_text.dart';
 import '../../orders/presentation/order_text.dart';
 
@@ -89,6 +90,12 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/capacity'),
+                icon: const Icon(Icons.event_busy_outlined),
+                label: Text(s.tr(CapText.title)),
               ),
             ],
             SectionHeader(s.language),

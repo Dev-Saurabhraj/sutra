@@ -197,6 +197,7 @@ class DeliveryPlan {
     required this.canMeet,
     required this.shortfalls,
     required this.curve,
+    this.counted = const [],
   });
 
   final int qty;
@@ -208,6 +209,9 @@ class DeliveryPlan {
   final bool canMeet;
   final List<Shortfall> shortfalls;
   final List<CurvePoint> curve;
+
+  /// Days off from the capacity calendar that this answer already counts.
+  final List<CapacityEvent> counted;
 
   /// Share that can be ready by the wanted date (0..1).
   double get onTimeShare => qty == 0 ? 1 : (qtyByWanted / qty).clamp(0, 1).toDouble();
@@ -222,6 +226,60 @@ class DeliveryPlan {
         canMeet: j['canMeet'] as bool,
         shortfalls: [for (final s in (j['shortfalls'] as List).cast<Map<String, dynamic>>()) Shortfall.fromJson(s)],
         curve: [for (final p in (j['curve'] as List).cast<Map<String, dynamic>>()) CurvePoint(DateTime.parse(p['date'] as String), _num(p['units']))],
+        counted: [for (final e in ((j['counted'] as List?) ?? const []).cast<Map<String, dynamic>>()) CapacityEvent.fromJson(e)],
+      );
+}
+
+/// Why fewer machines run on some days (P24).
+enum CapacityKind {
+  holiday('HOLIDAY'),
+  festival('FESTIVAL'),
+  wedding('WEDDING'),
+  powerCut('POWER_CUT'),
+  absence('ABSENCE'),
+  repair('REPAIR'),
+  other('OTHER');
+
+  const CapacityKind(this.code);
+  final String code;
+
+  static CapacityKind parse(String s) => CapacityKind.values.firstWhere((k) => k.code == s, orElse: () => CapacityKind.other);
+}
+
+class CapacityEvent {
+  const CapacityEvent({required this.id, required this.kind, required this.startsOn, required this.endsOn, required this.machinesOff, this.note});
+  final String id;
+  final CapacityKind kind;
+  final DateTime startsOn;
+  final DateTime endsOn;
+  final int machinesOff;
+  final String? note;
+
+  int get days => endsOn.difference(startsOn).inDays + 1;
+
+  factory CapacityEvent.fromJson(Map<String, dynamic> j) => CapacityEvent(
+        id: j['id'] as String,
+        kind: CapacityKind.parse(j['kind'] as String),
+        startsOn: DateTime.parse(j['startsOn'] as String),
+        endsOn: DateTime.parse(j['endsOn'] as String),
+        machinesOff: (j['machinesOff'] as num).toInt(),
+        note: j['note'] as String?,
+      );
+}
+
+/// Another maker's part of the same buyer request.
+class GroupPart {
+  const GroupPart({required this.code, required this.qty, required this.maker, required this.stage});
+  final String code;
+  final int qty;
+  final String maker;
+  final OrderStage stage;
+
+  factory GroupPart.fromJson(Map<String, dynamic> j) => GroupPart(
+        code: j['code'] as String,
+        qty: (j['qty'] as num).toInt(),
+        maker: j['maker'] as String,
+        stage: OrderStage.parse((j['status'] ?? j['stage']) as String),
       );
 }
 
@@ -301,13 +359,16 @@ class OrderInvoice {
 }
 
 class OrderDetail {
-  const OrderDetail({required this.order, required this.actions, required this.plan, required this.price, required this.messages, required this.invoices});
+  const OrderDetail({required this.order, required this.actions, required this.plan, required this.price, required this.messages, required this.invoices, this.group = const []});
   final Order order;
   final Set<OrderAction> actions;
   final DeliveryPlan? plan;
   final PriceCheck? price;
   final List<OrderMessage> messages;
   final List<OrderInvoice> invoices;
+
+  /// The rest of a buyer request shared across makers.
+  final List<GroupPart> group;
 
   factory OrderDetail.fromJson(Map<String, dynamic> j) => OrderDetail(
         order: Order.fromJson(j['order'] as Map<String, dynamic>),
@@ -322,6 +383,7 @@ class OrderDetail {
           for (final i in (j['invoices'] as List).cast<Map<String, dynamic>>())
             OrderInvoice(id: i['id'] as String, number: i['number'] as String, kind: i['kind'] as String, total: _num(i['total'])),
         ],
+        group: [for (final g in ((j['group'] as List?) ?? const []).cast<Map<String, dynamic>>()) GroupPart.fromJson(g)],
       );
 }
 

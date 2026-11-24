@@ -36,6 +36,8 @@ class ApiClient {
 
   Future<Map<String, dynamic>> patch(String path, {Object? body}) => _send(() => _dio.patch<dynamic>(path, data: body));
 
+  Future<Map<String, dynamic>> delete(String path) => _send(() => _dio.delete<dynamic>(path));
+
   /// Downloads a file (PDF, CSV…) as raw bytes.
   Future<Uint8List> getBytes(String path, {Map<String, dynamic>? query}) async {
     try {

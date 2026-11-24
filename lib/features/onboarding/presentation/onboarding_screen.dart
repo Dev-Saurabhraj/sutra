@@ -7,6 +7,7 @@ import '../../../design/art/thread_progress.dart';
 import '../../../design/tokens.dart';
 import 'onboarding_controller.dart';
 import 'onboarding_steps.dart';
+import 'role_choice.dart';
 import 'onboarding_text.dart';
 
 /// First-run setup for any small business. One question per screen, big choices,
@@ -19,6 +20,24 @@ class OnboardingScreen extends ConsumerWidget {
     final s = ref.watch(stringsProvider);
     final st = ref.watch(onboardingControllerProvider);
     final ctrl = ref.read(onboardingControllerProvider.notifier);
+    final role = ref.watch(onboardingRoleProvider);
+
+    // first: make/sell or buy? Buyers get a short form; makers the full setup below.
+    if (role != OnboardingRole.maker) {
+      return Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: SutraSpace.maxWidth),
+              child: AnimatedSwitcher(
+                duration: SutraMotion.normal,
+                child: role == OnboardingRole.buyer ? const BuyerSignupView(key: ValueKey('buyer')) : const RoleChoiceView(key: ValueKey('role')),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -32,7 +51,8 @@ class OnboardingScreen extends ConsumerWidget {
                   child: Row(
                     children: [
                       IconButton(
-                        onPressed: st.index > 0 && !st.submitting ? ctrl.back : null,
+                        // on the first step, back returns to "make or buy?"
+                        onPressed: st.submitting ? null : (st.index > 0 ? ctrl.back : () => ref.read(onboardingRoleProvider.notifier).state = null),
                         icon: const Icon(Icons.arrow_back_rounded),
                         tooltip: s.tr(OnbText.back),
                       ),

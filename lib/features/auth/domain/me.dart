@@ -1,18 +1,46 @@
-/// The logged-in user and, once onboarded, their business profile.
+/// The logged-in user and, once onboarded, their business: a maker/seller (producer) or a buyer.
 class Me {
-  const Me({required this.user, required this.producer, required this.consentVersion});
+  const Me({required this.user, required this.producer, required this.consentVersion, this.buyer});
 
   final SessionUser user;
   final ProducerProfile? producer;
+  final BuyerProfile? buyer;
   final String consentVersion;
+
+  /// Buyers get the marketplace (Bazaar), makers get the bahi.
+  bool get isBuyer => buyer != null;
 
   factory Me.fromJson(Map<String, dynamic> j) => Me(
         user: SessionUser.fromJson(j['user'] as Map<String, dynamic>),
         producer: j['producer'] == null ? null : ProducerProfile.fromJson(j['producer'] as Map<String, dynamic>),
+        buyer: j['buyer'] == null ? null : BuyerProfile.fromJson(j['buyer'] as Map<String, dynamic>),
         consentVersion: j['consentVersion'] as String,
       );
 
-  Me copyWith({SessionUser? user}) => Me(user: user ?? this.user, producer: producer, consentVersion: consentVersion);
+  Me copyWith({SessionUser? user}) => Me(user: user ?? this.user, producer: producer, buyer: buyer, consentVersion: consentVersion);
+}
+
+/// A shop, boutique or exporter buying from makers.
+class BuyerProfile {
+  const BuyerProfile({required this.id, required this.name, required this.business, required this.city, required this.state, required this.gstin, required this.phone});
+
+  final String id;
+  final String name;
+  final String business;
+  final String city;
+  final String state;
+  final String? gstin;
+  final String phone;
+
+  factory BuyerProfile.fromJson(Map<String, dynamic> j) => BuyerProfile(
+        id: j['id'] as String,
+        name: j['name'] as String,
+        business: j['business'] as String,
+        city: j['city'] as String,
+        state: j['state'] as String,
+        gstin: j['gstin'] as String?,
+        phone: j['phone'] as String,
+      );
 }
 
 class SessionUser {
