@@ -7,12 +7,12 @@ import '../tokens.dart';
 import 'spool_gauge.dart';
 
 /// Loading / error / data for an [AsyncValue], in Sutra's own style (a spool, not a spinner).
-class AsyncView<T> extends StatelessWidget {
+class AsyncView<V> extends StatelessWidget {
   const AsyncView({super.key, required this.value, required this.strings, required this.data, this.onRetry});
 
-  final AsyncValue<T> value;
+  final AsyncValue<V> value;
   final AppStrings strings;
-  final Widget Function(T data) data;
+  final Widget Function(V data) data;
   final VoidCallback? onRetry;
 
   @override

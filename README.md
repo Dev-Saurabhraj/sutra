@@ -34,8 +34,13 @@ lib/
     presentation/           screens and controllers
 ```
 
-Features in Phase 1: `auth` (OTP login, DPDP consent) · `home` (Aaj) · `stock` (spools, reorder) · `voice`
-(speak → preview → confirm) · `khata` (ledger, MSME clock, reminders) · `profile` · `alerts` · `shell` (woven nav).
+Features: `auth` (OTP login for any number, DPDP consent) · `onboarding` (9 steps, any industry, maker/trader) ·
+`home` (visual Aaj) · `inventory` (goods thread: supplier → raw → making → ready → client) · `labour` (roll call,
+wages, advances, wage slips) · `voice` (speak → preview → confirm) · `khata` (ledger, MSME clock, reminders) ·
+`stock` (material models, spool rows, reorder) · `profile` · `alerts` · `shell` (woven nav).
+
+Animated illustrations live in `lib/design/art/` (see `docs/DESIGN.md`). Feature text lives in per-feature phrase
+catalogs (`T('हिंदी', 'English')`, resolved with `strings.tr(...)`).
 
 ## Rules that matter here
 

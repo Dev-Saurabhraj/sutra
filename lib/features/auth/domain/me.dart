@@ -1,4 +1,4 @@
-/// The logged-in user and, for producers, their business profile.
+/// The logged-in user and, once onboarded, their business profile.
 class Me {
   const Me({required this.user, required this.producer, required this.consentVersion});
 
@@ -16,7 +16,7 @@ class Me {
 }
 
 class SessionUser {
-  const SessionUser({required this.id, required this.phone, required this.role, required this.language, required this.needsConsent});
+  const SessionUser({required this.id, required this.phone, required this.role, required this.language, required this.needsConsent, required this.needsOnboarding});
 
   final String id;
   final String phone;
@@ -24,15 +24,20 @@ class SessionUser {
   final String language;
   final bool needsConsent;
 
+  /// A new number: no business yet, so onboarding comes first.
+  final bool needsOnboarding;
+
   factory SessionUser.fromJson(Map<String, dynamic> j) => SessionUser(
         id: j['id'] as String,
         phone: j['phone'] as String,
         role: j['role'] as String,
         language: (j['language'] as String?) ?? 'hi',
         needsConsent: (j['needsConsent'] as bool?) ?? false,
+        needsOnboarding: (j['needsOnboarding'] as bool?) ?? false,
       );
 
-  SessionUser withConsent() => SessionUser(id: id, phone: phone, role: role, language: language, needsConsent: false);
+  SessionUser withConsent() =>
+      SessionUser(id: id, phone: phone, role: role, language: language, needsConsent: false, needsOnboarding: needsOnboarding);
 }
 
 class IndustryProfile {
@@ -69,6 +74,7 @@ class ProducerProfile {
     required this.avatarColor,
     required this.clusterName,
     required this.industry,
+    required this.isTrader,
   });
 
   final String id;
@@ -81,8 +87,11 @@ class ProducerProfile {
   final String? udyamNumber;
   final int machines;
   final String avatarColor;
-  final String clusterName;
+  final String? clusterName;
   final IndustryProfile industry;
+
+  /// Traders buy finished goods and resell: the app hides making and recipes for them.
+  final bool isTrader;
 
   factory ProducerProfile.fromJson(Map<String, dynamic> j) => ProducerProfile(
         id: j['id'] as String,
@@ -95,7 +104,8 @@ class ProducerProfile {
         udyamNumber: j['udyamNumber'] as String?,
         machines: (j['machines'] as num).toInt(),
         avatarColor: j['avatarColor'] as String,
-        clusterName: (j['cluster'] as Map<String, dynamic>)['name'] as String,
+        clusterName: (j['cluster'] as Map<String, dynamic>?)?['name'] as String?,
         industry: IndustryProfile.fromJson(j['industry'] as Map<String, dynamic>),
+        isTrader: j['businessKind'] == 'TRADER',
       );
 }

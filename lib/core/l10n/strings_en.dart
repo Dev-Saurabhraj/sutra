@@ -89,8 +89,6 @@ class EnglishStrings extends AppStrings {
   String get seeAll => 'See all';
   @override
   String get speakCta => 'Speak an entry';
-  @override
-  String get speakCtaSub => '“aaj 6 saree bani, 4 Jaipur bheji”';
 
   @override
   String get stockTitle => "What's running low?";

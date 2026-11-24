@@ -63,7 +63,6 @@ class _KhataScreenState extends ConsumerState<KhataScreen> {
                       Padding(padding: const EdgeInsets.all(32), child: Text(s.nothingHere, textAlign: TextAlign.center))
                     else
                       LedgerCard(
-                        ruled: false,
                         padding: const EdgeInsets.fromLTRB(34, 4, 14, 4),
                         child: Column(
                           children: [

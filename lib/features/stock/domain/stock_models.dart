@@ -25,6 +25,7 @@ class MaterialHealth {
     required this.nameHi,
     required this.unit,
     required this.stock,
+    required this.costPerUnit,
     required this.stockValue,
     required this.daysLeft,
     required this.leadTimeDays,
@@ -39,6 +40,7 @@ class MaterialHealth {
   final String nameHi;
   final String unit;
   final double stock;
+  final double costPerUnit;
   final double stockValue;
   final double? daysLeft;
   final int leadTimeDays;
@@ -56,6 +58,7 @@ class MaterialHealth {
         nameHi: j['nameHi'] as String,
         unit: j['unit'] as String,
         stock: (j['stock'] as num).toDouble(),
+        costPerUnit: (j['costPerUnit'] as num).toDouble(),
         stockValue: (j['stockValue'] as num).toDouble(),
         daysLeft: (j['daysLeft'] as num?)?.toDouble(),
         leadTimeDays: (j['leadTimeDays'] as num).toInt(),

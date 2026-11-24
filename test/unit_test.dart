@@ -52,7 +52,7 @@ void main() {
   group('models', () {
     test('MaterialHealth parses the API and fills the spool by days left', () {
       final m = MaterialHealth.fromJson({
-        'id': 'm1', 'name': 'Zari', 'nameHi': 'ज़री', 'unit': 'kg', 'stock': 1.1, 'stockValue': 10120,
+        'id': 'm1', 'name': 'Zari', 'nameHi': 'ज़री', 'unit': 'kg', 'stock': 1.1, 'costPerUnit': 9200, 'stockValue': 10120,
         'daysLeft': 15, 'leadTimeDays': 10, 'status': 'LOW', 'reorderBy': '2026-11-27T00:00:00.000Z',
         'suggestedQty': 2.7, 'supplier': {'name': 'Mahalaxmi Zari Works'},
       });
@@ -63,7 +63,7 @@ void main() {
 
     test('unused material shows a full spool', () {
       final m = MaterialHealth.fromJson({
-        'id': 'm2', 'name': 'Box', 'nameHi': 'डिब्बा', 'unit': 'pcs', 'stock': 40, 'stockValue': 960, 'daysLeft': null,
+        'id': 'm2', 'name': 'Box', 'nameHi': 'डिब्बा', 'unit': 'pcs', 'stock': 40, 'costPerUnit': 24, 'stockValue': 960, 'daysLeft': null,
         'leadTimeDays': 2, 'status': 'OK', 'reorderBy': null, 'suggestedQty': 0, 'supplier': null,
       });
       expect(m.spoolFill, 1);

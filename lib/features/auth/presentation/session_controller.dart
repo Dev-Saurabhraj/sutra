@@ -56,6 +56,12 @@ class SessionController extends AsyncNotifier<SessionState> {
     state = const AsyncData(SignedOut());
   }
 
+  /// Re-read the profile, e.g. after onboarding stored a new session.
+  Future<void> reload() async {
+    final me = await _repo.loadMe();
+    state = AsyncData(me == null ? const SignedOut() : SignedIn(me));
+  }
+
   /// Called by the API client when the refresh token is no longer valid.
   void expired() => state = const AsyncData(SignedOut());
 

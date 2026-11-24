@@ -9,15 +9,9 @@ import '../../../design/widgets/charkha_mic.dart';
 import '../../../design/widgets/parchi.dart';
 import '../../../design/widgets/stamp.dart';
 import '../../auth/presentation/session_controller.dart';
+import '../domain/voice_examples.dart';
 import '../domain/voice_models.dart';
 import 'voice_controller.dart';
-
-/// Example phrases per industry, so a brass worker isn't asked to say "saree".
-const _examples = {
-  'handloom': ['aaj 6 saree bani, 4 Jaipur bheji', 'आज 10 दुपट्टे बने', 'Jaipur se 5000 rupaye mile'],
-  'brass': ['aaj 20 diya set bane', '10 urli Delhi bheje', 'आज 8 हाथी बने'],
-};
-const _generic = ['aaj 10 piece bane', '5 piece Indore bheje'];
 
 class VoiceScreen extends ConsumerStatefulWidget {
   const VoiceScreen({super.key});
@@ -91,7 +85,7 @@ class _VoiceScreenState extends ConsumerState<VoiceScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final e in _examples[industry] ?? _generic)
+                for (final e in VoiceExamples.forIndustry(industry))
                   ActionChip(
                     label: Text('“$e”'),
                     backgroundColor: SutraColors.card,

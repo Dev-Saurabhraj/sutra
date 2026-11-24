@@ -12,9 +12,24 @@ enum AppLang {
   static AppLang fromCode(String? code) => code == 'en' ? AppLang.en : AppLang.hi;
 }
 
+/// A phrase in every supported language. Feature screens keep their own catalogs of these
+/// (e.g. `OnboardingText.welcome`) so strings live next to the feature that uses them.
+/// Adding a language = add a field here with a fallback to English.
+class T {
+  const T(this.hi, this.en);
+  final String hi;
+  final String en;
+}
+
 /// Every user-facing string. One implementation per language (add Tamil = add a class).
 abstract class AppStrings {
   const AppStrings();
+
+  /// Resolve a feature-catalog phrase in the current language.
+  String tr(T phrase) => switch (lang) {
+        AppLang.hi => phrase.hi,
+        AppLang.en => phrase.en,
+      };
 
   static AppStrings of(AppLang lang) => switch (lang) {
         AppLang.hi => const HindiStrings(),
@@ -70,7 +85,6 @@ abstract class AppStrings {
   String get rawMaterial;
   String get seeAll;
   String get speakCta;
-  String get speakCtaSub;
 
   // stock
   String get stockTitle;

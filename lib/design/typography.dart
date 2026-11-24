@@ -8,8 +8,9 @@ abstract final class SutraType {
   static List<String> get _devanagari => [GoogleFonts.notoSansDevanagari().fontFamily!];
 
   static TextStyle display(double size, {Color color = SutraColors.ink, FontWeight weight = FontWeight.w700}) =>
-      GoogleFonts.fraunces(fontSize: size, fontWeight: weight, color: color, height: 1.15)
-          .copyWith(fontFamilyFallback: _devanagari);
+      // 1.3 + even leading: Devanagari matras (ि ी ँ) sit above the Latin cap height and were clipped at 1.15.
+      GoogleFonts.fraunces(fontSize: size, fontWeight: weight, color: color, height: 1.3)
+          .copyWith(fontFamilyFallback: _devanagari, leadingDistribution: TextLeadingDistribution.even);
 
   /// Tabular numbers so amounts line up like a ledger column.
   static TextStyle figure(double size, {Color color = SutraColors.ink}) => display(size, color: color, weight: FontWeight.w600)
@@ -17,7 +18,8 @@ abstract final class SutraType {
 
   static TextTheme textTheme() {
     final base = GoogleFonts.interTextTheme().apply(bodyColor: SutraColors.ink, displayColor: SutraColors.ink);
-    TextStyle? withHindi(TextStyle? s) => s?.copyWith(fontFamilyFallback: _devanagari, height: 1.35);
+    TextStyle? withHindi(TextStyle? s) =>
+        s?.copyWith(fontFamilyFallback: _devanagari, height: 1.4, leadingDistribution: TextLeadingDistribution.even);
     return base.copyWith(
       headlineLarge: display(30),
       headlineMedium: display(24),

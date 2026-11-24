@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../tokens.dart';
 
-/// A page of the bahi-khata: faint ruled lines and a double red margin rule on the left.
+/// A page of the bahi-khata: paper, a double red margin rule on the left.
+/// Ruled lines are drawn by each [LedgerLine] under its own row, so text always sits on its line
+/// (a fixed background grid cut through rows of different heights).
 class LedgerCard extends StatelessWidget {
-  const LedgerCard({super.key, required this.child, this.padding = const EdgeInsets.fromLTRB(34, 14, 16, 14), this.ruled = true});
+  const LedgerCard({super.key, required this.child, this.padding = const EdgeInsets.fromLTRB(36, 6, 16, 6)});
 
   final Widget child;
   final EdgeInsets padding;
-  final bool ruled;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,7 @@ class LedgerCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: const BorderRadius.all(SutraRadius.md),
         child: CustomPaint(
-          painter: _LedgerPainter(ruled: ruled),
+          painter: const _MarginPainter(),
           child: Padding(padding: padding, child: child),
         ),
       ),
@@ -30,22 +31,11 @@ class LedgerCard extends StatelessWidget {
   }
 }
 
-class _LedgerPainter extends CustomPainter {
-  const _LedgerPainter({required this.ruled});
-
-  final bool ruled;
-  static const _lineGap = 30.0;
+class _MarginPainter extends CustomPainter {
+  const _MarginPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (ruled) {
-      final line = Paint()
-        ..color = const Color(0xFF9DB7C9).withValues(alpha: 0.18)
-        ..strokeWidth = 1;
-      for (var y = _lineGap; y < size.height; y += _lineGap) {
-        canvas.drawLine(Offset(0, y), Offset(size.width, y), line);
-      }
-    }
     final margin = Paint()
       ..color = SutraColors.marginRed.withValues(alpha: 0.75)
       ..strokeWidth = 1.2;
@@ -54,32 +44,41 @@ class _LedgerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _LedgerPainter oldDelegate) => oldDelegate.ruled != ruled;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// One entry line inside a ledger page: label on the left, figure on the right, dotted leader between.
+/// One entry in a ledger page: label (and optional sub-line) on the left, figure on the right,
+/// a dotted leader between them, and the page's ruled line underneath.
 class LedgerLine extends StatelessWidget {
-  const LedgerLine({super.key, required this.label, required this.value, this.sub, this.onTap});
+  const LedgerLine({super.key, required this.label, required this.value, this.sub, this.onTap, this.last = false});
 
   final String label;
   final Widget value;
   final String? sub;
   final VoidCallback? onTap;
 
+  /// The last row on a page has no rule under it.
+  final bool last;
+
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final row = Padding(
-      padding: const EdgeInsets.symmetric(vertical: 9),
+    final row = Container(
+      constraints: const BoxConstraints(minHeight: 56),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: last ? null : const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0x339DB7C9)))),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: text.bodyMedium),
-              if (sub != null) Text(sub!, style: text.bodySmall),
-            ],
+          Flexible(
+            flex: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: text.bodyMedium),
+                if (sub != null) Text(sub!, style: text.bodySmall),
+              ],
+            ),
           ),
           const Expanded(child: _DottedLeader()),
           value,
@@ -96,7 +95,7 @@ class _DottedLeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: CustomPaint(size: const Size.fromHeight(2), painter: _DotsPainter()),
     );
   }

@@ -38,7 +38,7 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         Text(p.businessName, style: SutraType.display(20)),
                         Text('${p.name} · ${p.city}', style: text.bodySmall),
-                        Text('${p.industry.emoji} ${s.pick(p.industry.nameHi, p.industry.name)} · ${p.clusterName}', style: text.bodySmall),
+                        Text(['${p.industry.emoji} ${s.pick(p.industry.nameHi, p.industry.name)}', ?p.clusterName].join(' · '), style: text.bodySmall),
                       ],
                     ),
                   ),

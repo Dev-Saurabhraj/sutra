@@ -85,8 +85,6 @@ class HindiStrings extends AppStrings {
   String get seeAll => 'सब देखें';
   @override
   String get speakCta => 'बोलकर लिखें';
-  @override
-  String get speakCtaSub => '“आज 6 साड़ी बनी, 4 जयपुर भेजी”';
 
   @override
   String get stockTitle => 'क्या कम है?';
