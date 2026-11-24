@@ -23,6 +23,7 @@ import '../features/market/presentation/buyer_shell.dart';
 import '../features/market/presentation/maker_page.dart';
 import '../features/market/presentation/product_page.dart';
 import '../features/money/money_screens.dart';
+import '../features/scale/scale_screens.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/orders/presentation/order_screen.dart';
 import '../features/orders/presentation/orders_screen.dart';
@@ -63,6 +64,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         SignedOut() => at == '/login' ? null : '/login',
         // consent first (DPDP), then set up the business, then the app
         SignedIn(:final me) when me.user.needsConsent => at == '/consent' ? null : '/consent',
+        SignedIn(:final me) when me.isCa => at == '/ca' ? null : '/ca',
         SignedIn(:final me) when !me.isClusterAdmin && (me.user.needsOnboarding || (me.producer == null && me.buyer == null)) => at == '/onboarding' ? null : '/onboarding',
         SignedIn(:final me) when me.isClusterAdmin => at == '/cluster' ? null : '/cluster',
         SignedIn(:final me) when me.isBuyer => _gates.contains(at) || !_isBuyerPath(at) ? '/bazaar' : null,
@@ -103,6 +105,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/capacity', builder: (_, _) => const CapacityScreen()),
       GoRoute(path: '/prices', builder: (_, _) => const PricesScreen()),
       GoRoute(path: '/schemes', builder: (_, _) => const SchemesScreen()),
+      GoRoute(path: '/ondc', builder: (_, _) => const OndcScreen()),
+      GoRoute(path: '/early-pay', builder: (_, _) => const EarlyPayScreen()),
+      GoRoute(path: '/clusters', builder: (_, _) => const JoinClusterScreen()),
+      GoRoute(path: '/ca', builder: (_, _) => const CaPortalScreen()),
       GoRoute(path: '/gst/2b', builder: (_, _) => const ReconcileScreen()),
       // the cooperative / FPO secretary (C1-C5)
       GoRoute(path: '/cluster', builder: (_, _) => const ClusterShell()),

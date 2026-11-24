@@ -17,6 +17,7 @@ import '../../../design/widgets/thread_stripe.dart';
 import '../../../design/widgets/wax_seal.dart';
 import '../../auth/presentation/session_controller.dart';
 import '../../profile/presentation/reach_settings.dart';
+import '../../scale/scale_screens.dart';
 import '../data/cluster_repository.dart';
 
 abstract final class ClText {
@@ -173,6 +174,7 @@ class _Makers extends ConsumerWidget {
             const SizedBox(height: 12),
             const ThreadStripe(radius: 2),
             const SizedBox(height: 12),
+            const JoinRequestsCard(),
             for (final m in o.makers) Padding(padding: const EdgeInsets.only(bottom: 10), child: _MakerRow(m: m, strings: s, topMade: o.makers.map((x) => x.made30).fold(1.0, (a, b) => a > b ? a : b))),
           ],
         ),

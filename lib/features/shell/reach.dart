@@ -59,7 +59,7 @@ class HelperModeController extends Notifier<bool> {
 final helperModeProvider = NotifierProvider<HelperModeController, bool>(HelperModeController.new);
 
 /// Screens a helper may not open.
-const helperBlocked = ['/khata', '/labour', '/gst', '/prices', '/profile', '/catalog', '/invoice', '/bill', '/capacity', '/schemes'];
+const helperBlocked = ['/khata', '/labour', '/gst', '/prices', '/profile', '/catalog', '/invoice', '/bill', '/capacity', '/schemes', '/ondc', '/early-pay', '/clusters'];
 
 /// Voice actions that move money: a helper may record goods by voice, not payments or wages.
 const helperMoneyKinds = {'PAYMENT_RECEIVED', 'PAYMENT_MADE', 'WAGE_PAID'};

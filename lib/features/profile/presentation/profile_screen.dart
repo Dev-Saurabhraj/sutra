@@ -14,6 +14,7 @@ import '../../gst/presentation/gst_text.dart';
 import '../../../core/l10n/common_text.dart';
 import '../../capacity/presentation/capacity_text.dart';
 import '../../money/money_text.dart';
+import '../../scale/scale_screens.dart';
 import 'reach_settings.dart';
 import '../../catalog/presentation/catalog_text.dart';
 import '../../orders/presentation/order_text.dart';
@@ -112,6 +113,18 @@ class ProfileScreen extends ConsumerWidget {
                 icon: const Icon(Icons.account_balance_outlined),
                 label: Text(s.tr(MoneyText.schemes)),
               ),
+              const SizedBox(height: 8),
+              Row(children: [
+                Expanded(child: OutlinedButton.icon(onPressed: () => context.push('/ondc'), icon: const Icon(Icons.hub_outlined), label: Text(s.tr(ScaleText.ondc)))),
+                const SizedBox(width: 8),
+                Expanded(child: OutlinedButton.icon(onPressed: () => context.push('/early-pay'), icon: const Icon(Icons.bolt_rounded), label: Text(s.tr(ScaleText.earlyPay)))),
+              ]),
+              if (p.clusterName == null) ...[
+                const SizedBox(height: 8),
+                OutlinedButton.icon(onPressed: () => context.push('/clusters'), icon: const Icon(Icons.groups_2_outlined), label: Text(s.tr(ScaleText.cluster))),
+              ],
+              SectionHeader(s.tr(ScaleText.ca)),
+              const CaAccessCard(),
               SectionHeader(s.tr(CommonText.helperMode)),
               const HelperModeCard(),
             ],
