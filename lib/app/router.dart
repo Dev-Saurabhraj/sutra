@@ -22,6 +22,7 @@ import '../features/market/presentation/buyer_orders_screen.dart';
 import '../features/market/presentation/buyer_shell.dart';
 import '../features/market/presentation/maker_page.dart';
 import '../features/market/presentation/product_page.dart';
+import '../features/money/money_screens.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/orders/presentation/order_screen.dart';
 import '../features/orders/presentation/orders_screen.dart';
@@ -101,6 +102,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       // full-screen tasks opened from anywhere (back returns to where you were)
       GoRoute(path: '/capacity', builder: (_, _) => const CapacityScreen()),
       GoRoute(path: '/prices', builder: (_, _) => const PricesScreen()),
+      GoRoute(path: '/schemes', builder: (_, _) => const SchemesScreen()),
+      GoRoute(path: '/gst/2b', builder: (_, _) => const ReconcileScreen()),
       // the cooperative / FPO secretary (C1-C5)
       GoRoute(path: '/cluster', builder: (_, _) => const ClusterShell()),
       GoRoute(path: '/bill', builder: (_, _) => const BillScreen()),

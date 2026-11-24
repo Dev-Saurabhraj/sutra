@@ -13,6 +13,7 @@ import '../../auth/presentation/session_controller.dart';
 import '../../gst/presentation/gst_text.dart';
 import '../../../core/l10n/common_text.dart';
 import '../../capacity/presentation/capacity_text.dart';
+import '../../money/money_text.dart';
 import 'reach_settings.dart';
 import '../../catalog/presentation/catalog_text.dart';
 import '../../orders/presentation/order_text.dart';
@@ -104,6 +105,12 @@ class ProfileScreen extends ConsumerWidget {
                 onPressed: () => context.push('/prices'),
                 icon: const Icon(Icons.trending_up_rounded),
                 label: Text(s.tr(CommonText.prices)),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/schemes'),
+                icon: const Icon(Icons.account_balance_outlined),
+                label: Text(s.tr(MoneyText.schemes)),
               ),
               SectionHeader(s.tr(CommonText.helperMode)),
               const HelperModeCard(),

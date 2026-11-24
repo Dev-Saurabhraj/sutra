@@ -67,22 +67,25 @@ class LedgerLine extends StatelessWidget {
       constraints: const BoxConstraints(minHeight: 56),
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: last ? null : const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0x339DB7C9)))),
-      child: Row(
-        children: [
-          Flexible(
-            flex: 0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: text.bodyMedium),
-                if (sub != null) Text(sub!, style: text.bodySmall),
-              ],
+      // A long label wraps (at most ~68% of the row) instead of pushing the figure off the page.
+      child: LayoutBuilder(
+        builder: (context, box) => Row(
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: box.maxWidth * 0.68),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: text.bodyMedium),
+                  if (sub != null) Text(sub!, style: text.bodySmall),
+                ],
+              ),
             ),
-          ),
-          const Expanded(child: _DottedLeader()),
-          value,
-        ],
+            const Expanded(child: _DottedLeader()),
+            value,
+          ],
+        ),
       ),
     );
     return onTap == null ? row : InkWell(onTap: onTap, child: row);

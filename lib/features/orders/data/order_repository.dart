@@ -22,10 +22,11 @@ class HttpOrderRepository implements OrderRepository {
       OrderDetail.fromJson(await _api.post('/orders/$code/respond', body: {'accept': accept}, idempotent: true));
 
   @override
-  Future<OrderDetail> dispatch(String code, {String? transporter, String? lrNumber, DispatchPhoto? photo}) async => OrderDetail.fromJson(
+  Future<OrderDetail> dispatch(String code, {String? transporter, String? lrNumber, String? vehicleNo, DispatchPhoto? photo}) async => OrderDetail.fromJson(
         await _api.post('/orders/$code/dispatch', idempotent: true, body: {
           if (transporter != null && transporter.trim().isNotEmpty) 'transporter': transporter.trim(),
           if (lrNumber != null && lrNumber.trim().isNotEmpty) 'lrNumber': lrNumber.trim(),
+          if (vehicleNo != null && vehicleNo.trim().isNotEmpty) 'vehicleNo': vehicleNo.trim(),
           if (photo != null) 'photo': {'base64': base64Encode(photo.bytes), 'mediaType': photo.mediaType},
         }),
       );
@@ -38,6 +39,16 @@ class HttpOrderRepository implements OrderRepository {
       OrderDetail.fromJson(await _api.post('/orders/$code/messages', body: {'text': text}, idempotent: true));
 
   @override
+  Future<OrderDetail> requestAdvance(String code, int pct) async =>
+      OrderDetail.fromJson(await _api.post('/orders/$code/advance', body: {'pct': pct}, idempotent: true));
+
+  @override
+  Future<OrderDetail> confirmAdvance(String code) async => OrderDetail.fromJson(await _api.post('/orders/$code/advance/received', idempotent: true));
+
+  @override
+  Future<Map<String, dynamic>> ewayBill(String code) => _api.get('/orders/$code/eway-bill');
+
+  @override
   Future<Uint8List> dispatchPhoto(String code) => _api.getBytes('/orders/$code/dispatch-photo');
 }
 
@@ -45,6 +56,7 @@ final orderRepositoryProvider = Provider<OrderRepository>((ref) => HttpOrderRepo
 
 final orderTabProvider = StateProvider.autoDispose<OrderTab>((_) => OrderTab.fresh);
 final orderInboxProvider = FutureProvider.autoDispose((ref) => ref.watch(orderRepositoryProvider).inbox(ref.watch(orderTabProvider)));
+final ewayBillProvider = FutureProvider.autoDispose.family<Map<String, dynamic>, String>((ref, code) => ref.watch(orderRepositoryProvider).ewayBill(code));
 final dispatchPhotoProvider = FutureProvider.autoDispose.family<Uint8List, String>((ref, code) => ref.watch(orderRepositoryProvider).dispatchPhoto(code));
 
 /// One order, kept in sync with every action taken on it (each action returns the fresh detail).
@@ -55,8 +67,10 @@ class OrderController extends AutoDisposeFamilyAsyncNotifier<OrderDetail, String
   Future<OrderDetail> build(String code) => ref.watch(orderRepositoryProvider).detail(code);
 
   Future<void> respond({required bool accept}) => _apply(() => _repo.respond(arg, accept: accept));
-  Future<void> dispatch({String? transporter, String? lrNumber, DispatchPhoto? photo}) =>
-      _apply(() => _repo.dispatch(arg, transporter: transporter, lrNumber: lrNumber, photo: photo));
+  Future<void> dispatch({String? transporter, String? lrNumber, String? vehicleNo, DispatchPhoto? photo}) =>
+      _apply(() => _repo.dispatch(arg, transporter: transporter, lrNumber: lrNumber, vehicleNo: vehicleNo, photo: photo));
+  Future<void> requestAdvance(int pct) => _apply(() => _repo.requestAdvance(arg, pct));
+  Future<void> confirmAdvance() => _apply(() => _repo.confirmAdvance(arg));
   Future<void> deliver() => _apply(() => _repo.deliver(arg));
   Future<void> send(String text) => _apply(() => _repo.message(arg, text));
 

@@ -18,6 +18,7 @@ import '../../gst/presentation/gst_text.dart';
 import '../../orders/domain/order_models.dart';
 import '../data/market_repository.dart';
 import '../domain/market_models.dart';
+import '../../money/advance_cards.dart';
 import 'buyer_orders_screen.dart';
 import 'market_text.dart';
 
@@ -48,6 +49,7 @@ class BuyerOrderScreen extends ConsumerWidget {
                   children: [
                     _Header(order: d.order, strings: s),
                     if (d.group.isNotEmpty) ...[const SizedBox(height: 14), _Group(order: d.order, group: d.group, strings: s)],
+                    if (d.order.advance != null) ...[const SizedBox(height: 14), BuyerAdvanceCard(code: code, advance: d.order.advance!, strings: s)],
                     if (d.order.dispatchedAt != null) ...[const SizedBox(height: 14), _Shipped(order: d.order, strings: s)],
                     if (d.invoices.isNotEmpty) ...[SectionHeader(s.tr(MarketText.documents)), _Documents(invoices: d.invoices, strings: s)],
                     SectionHeader(s.tr(MarketText.letters)),

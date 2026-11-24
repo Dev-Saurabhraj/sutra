@@ -102,7 +102,7 @@ class _HelperBanner extends ConsumerWidget {
 }
 
 /// Routes that open on top of the tabs (back returns home); everything else switches tab.
-const _fullScreen = ['/gst', '/bill', '/order', '/catalog', '/invoice', '/prices', '/capacity'];
+const _fullScreen = ['/gst', '/bill', '/order', '/catalog', '/invoice', '/prices', '/capacity', '/schemes'];
 
 /// The trade, alive: the producer's own industry scene with the greeting.
 class _Hero extends ConsumerWidget {
@@ -190,6 +190,7 @@ class _AlertStrip extends ConsumerWidget {
             'ORDER' => (Icons.shopping_bag_outlined, SutraColors.haldiDeep),
             'PAYMENT' => (Icons.currency_rupee_rounded, SutraColors.sindoor),
             'GST' => (Icons.receipt_long_outlined, SutraColors.kumkum),
+            'PRICE' => (Icons.trending_up_rounded, SutraColors.kumkum),
             _ => (Icons.info_outline_rounded, SutraColors.neel),
           };
           return ActionChip(

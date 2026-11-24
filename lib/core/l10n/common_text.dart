@@ -32,6 +32,7 @@ abstract final class CommonText {
   static const helperOn = T('मुनीम मोड चालू', 'Helper mode on');
   static const unlock = T('मालिक: खोलें', 'Owner: unlock');
   static const wrongPin = T('PIN ग़लत है', 'Wrong PIN');
+  static const helperNoMoney = T('मुनीम मोड में पैसे और मज़दूरी की एंट्री मालिक ही करेंगे', 'In helper mode, payments and wages are for the owner to record');
 
   // P25 price watch
   static const prices = T('माल के दाम', 'Material prices');

@@ -16,6 +16,7 @@ import '../../../design/widgets/async_view.dart';
 import '../../../design/widgets/bits.dart';
 import '../../../design/widgets/ledger_card.dart';
 import '../../../design/widgets/stamp.dart';
+import '../../money/money_text.dart';
 import '../data/gst_repository.dart';
 import '../domain/gst_models.dart';
 import 'gst_text.dart';
@@ -32,6 +33,7 @@ class GstScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(s.tr(GstText.title)),
         actions: [
+          IconButton(tooltip: s.tr(MoneyText.twoB), onPressed: () => context.push('/gst/2b'), icon: const Icon(Icons.fact_check_outlined)),
           TextButton.icon(onPressed: () => context.push('/bill'), icon: const Icon(Icons.photo_camera_outlined), label: Text(s.tr(GstText.snapBill))),
         ],
       ),

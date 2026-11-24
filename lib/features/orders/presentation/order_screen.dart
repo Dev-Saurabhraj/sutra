@@ -21,6 +21,7 @@ import '../../gst/presentation/gst_text.dart';
 import '../../home/data/home_repository.dart';
 import '../data/order_repository.dart';
 import '../domain/order_models.dart';
+import '../../money/advance_cards.dart';
 import 'dispatch_sheet.dart';
 import 'order_letters.dart';
 import 'order_text.dart';
@@ -62,7 +63,17 @@ class OrderScreen extends ConsumerWidget {
                             const SizedBox(height: 14),
                             PriceFloorCard(price: d.price!, strings: s),
                           ],
+                          // B8: advance while the order is being made (or once one was asked)
+                          if (d.order.advance != null || d.order.stage == OrderStage.making || d.order.stage == OrderStage.confirmed) ...[
+                            const SizedBox(height: 14),
+                            MakerAdvanceCard(order: d.order, strings: s),
+                          ],
                           if (d.order.dispatchedAt != null) ...[const SizedBox(height: 14), _DispatchCard(order: d.order, strings: s)],
+                          // X6: before and after dispatch
+                          if (d.order.stage == OrderStage.making || d.order.stage == OrderStage.confirmed || d.order.stage == OrderStage.dispatched) ...[
+                            const SizedBox(height: 14),
+                            EwayBillCard(code: d.order.code, strings: s),
+                          ],
                           if (d.invoices.isNotEmpty) ...[const SizedBox(height: 14), _Invoices(invoices: d.invoices, strings: s)],
                           SectionHeader(s.tr(OrderText.letters)),
                           OrderLetters(messages: d.messages, strings: s),

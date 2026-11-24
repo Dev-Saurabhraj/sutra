@@ -366,6 +366,7 @@ class BuyerOrder {
     this.hasDispatchPhoto = false,
     this.group,
     this.lastMessage,
+    this.advance,
   });
 
   final String code;
@@ -389,6 +390,7 @@ class BuyerOrder {
   final bool hasDispatchPhoto;
   final String? group;
   final String? lastMessage;
+  final AdvanceInfo? advance;
 
   double get value => qty * rate;
 
@@ -418,6 +420,7 @@ class BuyerOrder {
       hasDispatchPhoto: j['hasDispatchPhoto'] as bool? ?? false,
       group: j['parentCode'] as String?,
       lastMessage: (j['lastMessage'] as Map<String, dynamic>?)?['text'] as String?,
+      advance: AdvanceInfo.fromJson(j['advance']),
     );
   }
 }
@@ -480,4 +483,5 @@ abstract interface class MarketRepository {
   Future<Uint8List> invoicePdf(String id);
   Future<Uint8List> dispatchPhoto(String code);
   Future<void> signUp(BuyerSignup s, {required String language});
+  Future<BuyerOrderDetail> claimAdvance(String code, String utr);
 }

@@ -30,6 +30,32 @@ enum OrderStage {
 
 enum OrderTab { fresh, active, done }
 
+enum AdvanceStatus {
+  requested,
+  claimed,
+  paid;
+
+  static AdvanceStatus parse(String s) => switch (s) { 'PAID' => AdvanceStatus.paid, 'CLAIMED' => AdvanceStatus.claimed, _ => AdvanceStatus.requested };
+}
+
+/// B8: part of the money before making, paid straight to the maker's UPI ID.
+class AdvanceInfo {
+  const AdvanceInfo({required this.amount, required this.status, this.ref, this.upiUrl});
+  final double amount;
+  final AdvanceStatus status;
+
+  /// The buyer's UPI reference (UTR) once they say it's paid.
+  final String? ref;
+
+  /// Buyer side only: the link that opens their UPI app.
+  final String? upiUrl;
+
+  static AdvanceInfo? fromJson(Object? j) {
+    if (j is! Map<String, dynamic>) return null;
+    return AdvanceInfo(amount: (j['amount'] as num).toDouble(), status: AdvanceStatus.parse(j['status'] as String), ref: j['ref'] as String?, upiUrl: j['upiUrl'] as String?);
+  }
+}
+
 extension OrderTabQuery on OrderTab {
   String get query => switch (this) { OrderTab.fresh => 'new', OrderTab.active => 'active', OrderTab.done => 'done' };
 }
@@ -96,6 +122,8 @@ class Order {
     this.lrNumber,
     this.hasDispatchPhoto = false,
     this.lastMessage,
+    this.advance,
+    this.vehicleNo,
   });
 
   final String code;
@@ -114,6 +142,8 @@ class Order {
   final String? lrNumber;
   final bool hasDispatchPhoto;
   final LastMessage? lastMessage;
+  final AdvanceInfo? advance;
+  final String? vehicleNo;
 
   double get value => qty * rate;
 
@@ -138,6 +168,8 @@ class Order {
       transporter: j['transporter'] as String?,
       lrNumber: j['lrNumber'] as String?,
       hasDispatchPhoto: j['hasDispatchPhoto'] as bool? ?? false,
+      advance: AdvanceInfo.fromJson(j['advance']),
+      vehicleNo: j['vehicleNo'] as String?,
       lastMessage: m == null ? null : LastMessage(text: m['text'] as String, textHi: m['textHi'] as String?, fromBuyer: m['sender'] == 'BUYER'),
     );
   }
@@ -397,7 +429,10 @@ abstract interface class OrderRepository {
   Future<OrderInbox> inbox(OrderTab tab);
   Future<OrderDetail> detail(String code);
   Future<OrderDetail> respond(String code, {required bool accept});
-  Future<OrderDetail> dispatch(String code, {String? transporter, String? lrNumber, DispatchPhoto? photo});
+  Future<OrderDetail> dispatch(String code, {String? transporter, String? lrNumber, String? vehicleNo, DispatchPhoto? photo});
+  Future<OrderDetail> requestAdvance(String code, int pct);
+  Future<OrderDetail> confirmAdvance(String code);
+  Future<Map<String, dynamic>> ewayBill(String code);
   Future<OrderDetail> deliver(String code);
   Future<OrderDetail> message(String code, String text);
   Future<Uint8List> dispatchPhoto(String code);

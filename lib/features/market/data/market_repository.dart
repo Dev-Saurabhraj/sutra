@@ -51,6 +51,10 @@ class HttpMarketRepository implements MarketRepository {
       BuyerOrderDetail.fromJson(await _api.post('/market/orders/$code/messages', body: {'text': text}, idempotent: true));
 
   @override
+  Future<BuyerOrderDetail> claimAdvance(String code, String utr) async =>
+      BuyerOrderDetail.fromJson(await _api.post('/market/orders/$code/advance-paid', body: {'utr': utr}, idempotent: true));
+
+  @override
   Future<Uint8List> invoicePdf(String id) => _api.getBytes('/market/invoices/$id/pdf');
 
   @override
@@ -86,6 +90,11 @@ class BuyerOrderController extends AutoDisposeFamilyAsyncNotifier<BuyerOrderDeta
 
   Future<void> send(String text) async {
     state = AsyncData(await ref.read(marketRepositoryProvider).message(arg, text));
+    ref.invalidate(buyerOrdersProvider);
+  }
+
+  Future<void> claimAdvance(String utr) async {
+    state = AsyncData(await ref.read(marketRepositoryProvider).claimAdvance(arg, utr));
     ref.invalidate(buyerOrdersProvider);
   }
 }

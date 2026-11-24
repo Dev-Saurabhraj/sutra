@@ -97,8 +97,8 @@ class ClusterRepository {
   Future<Map<String, dynamic>> compliance() => _api.get('/cluster/compliance');
   Future<Map<String, dynamic>> impact() => _api.get('/cluster/impact');
   Future<List<String>> categories() async {
-    final j = await _api.get('/market/products');
-    return ((j['facets'] as Map)['categories'] as List).cast<String>();
+    final j = await _api.get('/cluster/categories');
+    return (j['categories'] as List).cast<String>();
   }
 }
 
