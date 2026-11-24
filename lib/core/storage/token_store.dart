@@ -22,10 +22,16 @@ class SecureTokenStore implements TokenStore {
 
   @override
   Future<StoredTokens?> read() async {
-    final access = await _storage.read(key: _access);
-    final refresh = await _storage.read(key: _refresh);
-    if (access == null || refresh == null) return null;
-    return StoredTokens(accessToken: access, refreshToken: refresh);
+    try {
+      final access = await _storage.read(key: _access);
+      final refresh = await _storage.read(key: _refresh);
+      if (access == null || refresh == null) return null;
+      return StoredTokens(accessToken: access, refreshToken: refresh);
+    } catch (_) {
+      // unreadable store (e.g. Android keystore reset after a reinstall): start clean instead of crashing
+      await _storage.deleteAll().catchError((_) {});
+      return null;
+    }
   }
 
   @override

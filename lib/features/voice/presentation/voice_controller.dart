@@ -81,6 +81,12 @@ class VoiceController extends AutoDisposeNotifier<VoiceState> {
           understand();
         }
       },
+      // stopped by silence, the time limit or an error: use what was heard, or go back to idle
+      onDone: () {
+        if (state.phase != VoicePhase.listening) return;
+        state = state.copyWith(phase: VoicePhase.idle);
+        if (state.transcript.trim().isNotEmpty) understand();
+      },
     );
   }
 

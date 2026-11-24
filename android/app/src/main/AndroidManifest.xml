@@ -1,5 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- the API (release builds need this too; debug adds it on its own) -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- voice entry: speech_to_text needs the mic -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
+        android:allowBackup="false"
+        android:fullBackupContent="false"
         android:label="sutra"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -40,6 +46,22 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Android 11+: without this the app can't see Google's speech service, so the mic never starts -->
+        <intent>
+            <action android:name="android.speech.RecognitionService"/>
+        </intent>
+        <!-- opening WhatsApp / UPI / phone links -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="upi"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
         </intent>
     </queries>
 </manifest>
