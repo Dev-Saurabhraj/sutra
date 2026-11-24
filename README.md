@@ -38,7 +38,9 @@ Features: `auth` (OTP login for any number, DPDP consent) · `onboarding` (9 ste
 `home` (visual Aaj) · `inventory` (goods thread: supplier → raw → making → ready → client) · `labour` (roll call,
 wages, advances, wage slips) · `voice` (speak → preview → confirm) · `khata` (ledger, MSME clock, reminders) ·
 `stock` (material models, spool rows, reorder) · `bills` (snap a bill → checked draft → stock + ITC) ·
-`gst` (period summary by scheme, issues, CA exports, invoices + PDF share) · `profile` · `alerts` · `shell` (woven nav).
+`gst` (period summary by scheme, issues, CA exports, invoices + PDF share) · `orders` (inbox, "can I deliver?",
+price check, dispatch, translated letters) · `catalog` (photo → story → price → publish) · `profile` · `alerts` ·
+`shell` (woven nav).
 
 Animated illustrations live in `lib/design/art/` (see `docs/DESIGN.md`). Feature text lives in per-feature phrase
 catalogs (`T('हिंदी', 'English')`, resolved with `strings.tr(...)`).

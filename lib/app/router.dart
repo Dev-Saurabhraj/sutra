@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../features/auth/presentation/consent_screen.dart';
 import '../features/bills/presentation/bill_screen.dart';
+import '../features/catalog/presentation/catalog_screen.dart';
+import '../features/catalog/presentation/listing_screen.dart';
 import '../features/gst/presentation/gst_screen.dart';
 import '../features/gst/presentation/invoice_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
@@ -13,6 +15,8 @@ import '../features/inventory/presentation/inventory_screen.dart';
 import '../features/khata/presentation/khata_screen.dart';
 import '../features/labour/presentation/labour_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
+import '../features/orders/presentation/order_screen.dart';
+import '../features/orders/presentation/orders_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/shell/app_shell.dart';
 import '../features/shell/splash_screen.dart';
@@ -66,6 +70,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/bill', builder: (_, _) => const BillScreen()),
       GoRoute(path: '/gst', builder: (_, _) => const GstScreen()),
       GoRoute(path: '/invoice/:id', builder: (_, state) => InvoiceScreen(id: state.pathParameters['id']!)),
+      GoRoute(path: '/orders', builder: (_, _) => const OrdersScreen()),
+      GoRoute(path: '/order/:code', builder: (_, state) => OrderScreen(code: state.pathParameters['code']!)),
+      GoRoute(path: '/catalog', builder: (_, _) => const CatalogScreen()),
+      GoRoute(path: '/catalog/:id', builder: (_, state) => ListingScreen(productId: state.pathParameters['id']!)),
       // old links from alerts and earlier builds
       GoRoute(path: '/stock', redirect: (_, _) => '/inventory'),
     ],

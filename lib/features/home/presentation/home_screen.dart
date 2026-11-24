@@ -21,6 +21,8 @@ import '../../inventory/presentation/inventory_text.dart';
 import '../../labour/presentation/labour_text.dart';
 import '../../bills/presentation/bill_text.dart';
 import '../../gst/presentation/gst_text.dart';
+import '../../catalog/presentation/catalog_text.dart';
+import '../../orders/presentation/order_text.dart';
 import '../../voice/domain/voice_examples.dart';
 import '../data/home_repository.dart';
 import '../domain/home_models.dart';
@@ -50,6 +52,8 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 14),
                 _MoneyCard(home: h, strings: s),
                 const SizedBox(height: 14),
+                _OrdersCard(kpis: h.kpis, strings: s),
+                const SizedBox(height: 14),
                 _FlowCard(flow: h.flow, strings: s),
                 if (h.labour.workers > 0) ...[const SizedBox(height: 14), _TeamCard(labour: h.labour, strings: s)],
                 const SizedBox(height: 14),
@@ -63,6 +67,9 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 }
+
+/// Routes that open on top of the tabs (back returns home); everything else switches tab.
+const _fullScreen = ['/gst', '/bill', '/order', '/catalog', '/invoice'];
 
 /// The trade, alive: the producer's own industry scene with the greeting.
 class _Hero extends ConsumerWidget {
@@ -163,7 +170,7 @@ class _AlertStrip extends ConsumerWidget {
                     ref.read(alertRepositoryProvider).markRead(a.id);
                     final route = a.route == '/stock' ? '/inventory' : a.route!;
                     // full-screen tasks open on top (back returns home); tabs switch in place
-                    if (route == '/gst' || route == '/bill') {
+                    if (_fullScreen.any(route.startsWith)) {
                       context.push(route);
                     } else {
                       context.go(route);
@@ -412,4 +419,57 @@ class _GstCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Orders at a glance: new requests waiting for an answer (the one thing buyers wait on), and what is being made.
+class _OrdersCard extends StatelessWidget {
+  const _OrdersCard({required this.kpis, required this.strings});
+  final HomeKpis kpis;
+  final AppStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = strings;
+    final text = Theme.of(context).textTheme;
+    return _Card(
+      onTap: () => context.push('/orders'),
+      child: Row(
+        children: [
+          _Count(n: kpis.newRequests, label: s.tr(OrderText.tabNew), color: kpis.newRequests > 0 ? SutraColors.sindoor : SutraColors.inkSoft),
+          Container(width: 1, height: 44, margin: const EdgeInsets.symmetric(horizontal: 14), color: SutraColors.rule),
+          _Count(n: kpis.openOrders, label: s.tr(OrderText.tabActive), color: SutraColors.neel),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(s.tr(OrderText.title), style: text.titleSmall),
+              const SizedBox(height: 4),
+              TextButton.icon(
+                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8), minimumSize: const Size(0, 36)),
+                onPressed: () => context.push('/catalog'),
+                icon: const Icon(Icons.auto_stories_outlined, size: 18),
+                label: Text(s.tr(CatalogText.title)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Count extends StatelessWidget {
+  const _Count({required this.n, required this.label, required this.color});
+  final int n;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$n', style: SutraType.figure(26, color: color)),
+          Text(label, style: Theme.of(context).textTheme.labelMedium),
+        ],
+      );
 }

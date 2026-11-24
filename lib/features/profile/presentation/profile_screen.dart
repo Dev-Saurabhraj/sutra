@@ -11,6 +11,8 @@ import '../../../design/widgets/ledger_card.dart';
 import '../../../design/widgets/thread_stripe.dart';
 import '../../auth/presentation/session_controller.dart';
 import '../../gst/presentation/gst_text.dart';
+import '../../catalog/presentation/catalog_text.dart';
+import '../../orders/presentation/order_text.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -67,6 +69,26 @@ class ProfileScreen extends ConsumerWidget {
                 onPressed: () => context.push('/gst'),
                 icon: const Icon(Icons.receipt_long_outlined),
                 label: Text(s.tr(GstText.title)),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/orders'),
+                      icon: const Icon(Icons.shopping_bag_outlined),
+                      label: Text(s.tr(OrderText.title)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/catalog'),
+                      icon: const Icon(Icons.auto_stories_outlined),
+                      label: Text(s.tr(CatalogText.title)),
+                    ),
+                  ),
+                ],
               ),
             ],
             SectionHeader(s.language),
