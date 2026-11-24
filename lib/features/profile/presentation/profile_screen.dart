@@ -11,7 +11,9 @@ import '../../../design/widgets/ledger_card.dart';
 import '../../../design/widgets/thread_stripe.dart';
 import '../../auth/presentation/session_controller.dart';
 import '../../gst/presentation/gst_text.dart';
+import '../../../core/l10n/common_text.dart';
 import '../../capacity/presentation/capacity_text.dart';
+import 'reach_settings.dart';
 import '../../catalog/presentation/catalog_text.dart';
 import '../../orders/presentation/order_text.dart';
 
@@ -97,12 +99,24 @@ class ProfileScreen extends ConsumerWidget {
                 icon: const Icon(Icons.event_busy_outlined),
                 label: Text(s.tr(CapText.title)),
               ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/prices'),
+                icon: const Icon(Icons.trending_up_rounded),
+                label: Text(s.tr(CommonText.prices)),
+              ),
+              SectionHeader(s.tr(CommonText.helperMode)),
+              const HelperModeCard(),
             ],
+            const SizedBox(height: 8),
+            const VoiceAlertsSwitch(),
             SectionHeader(s.language),
             _LanguagePicker(strings: s),
             SectionHeader(s.privacy),
             Text(s.consentPoints.join('\n'), style: text.bodySmall),
-            const SizedBox(height: 28),
+            const SizedBox(height: 12),
+            const PrivacyActions(),
+            const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () => ref.read(sessionControllerProvider.notifier).logout(),
               icon: const Icon(Icons.logout_rounded),

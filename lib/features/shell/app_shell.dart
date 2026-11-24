@@ -6,10 +6,12 @@ import '../../app/providers.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../design/tokens.dart';
 import '../../design/widgets/woven_nav_bar.dart';
+import 'reach.dart';
 
 /// Router branch order: 0 home · 1 inventory · 2 voice (charkha) · 3 khata · 4 labour · 5 profile (opened from the avatar).
 const voiceBranch = 2;
 const _tabBranches = [0, 1, 3, 4];
+const _helperBranches = [0, 1];
 
 const _navGoods = T('माल', 'Goods');
 const _navTeam = T('कारीगर', 'Team');
@@ -22,20 +24,25 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
-    final tabIndex = _tabBranches.indexOf(shell.currentIndex);
+    // helper (munim) mode: only Today and Goods, plus the charkha
+    final helper = ref.watch(helperModeProvider);
+    final branches = helper ? _helperBranches : _tabBranches;
+    final tabIndex = branches.indexOf(shell.currentIndex);
     return Scaffold(
-      body: Center(
-        child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: SutraSpace.maxWidth), child: shell),
+      body: ReachWatcher(
+        child: Center(
+          child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: SutraSpace.maxWidth), child: shell),
+        ),
       ),
       bottomNavigationBar: WovenNavBar(
         items: [
           WovenNavItem(icon: Icons.wb_sunny_outlined, label: s.navHome),
           WovenNavItem(icon: Icons.inventory_2_outlined, label: s.tr(_navGoods)),
-          WovenNavItem(icon: Icons.menu_book_outlined, label: s.navKhata),
-          WovenNavItem(icon: Icons.groups_2_outlined, label: s.tr(_navTeam)),
+          if (!helper) WovenNavItem(icon: Icons.menu_book_outlined, label: s.navKhata),
+          if (!helper) WovenNavItem(icon: Icons.groups_2_outlined, label: s.tr(_navTeam)),
         ],
         currentIndex: tabIndex < 0 ? null : tabIndex,
-        onSelect: (i) => shell.goBranch(_tabBranches[i], initialLocation: _tabBranches[i] == shell.currentIndex),
+        onSelect: (i) => shell.goBranch(branches[i], initialLocation: branches[i] == shell.currentIndex),
         onCharkha: () => shell.goBranch(voiceBranch),
         charkhaLabel: s.navVoice,
         charkhaActive: shell.currentIndex == voiceBranch,

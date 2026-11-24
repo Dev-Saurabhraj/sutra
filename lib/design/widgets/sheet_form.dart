@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
+import '../../core/l10n/common_text.dart';
 import '../../core/network/api_exception.dart';
+import '../../core/network/outbox.dart';
 import '../tokens.dart';
 import 'form_bits.dart';
 
@@ -42,6 +44,10 @@ class _SheetFormState extends ConsumerState<SheetForm> {
       final done = await widget.onSave();
       navigator.pop();
       if (done != null) messenger.showSnackBar(SnackBar(content: Text(done)));
+    } on SavedOffline {
+      // no network: the entry waits on the phone and goes out by itself later
+      navigator.pop();
+      messenger.showSnackBar(SnackBar(content: Text(s.tr(CommonText.savedOffline))));
     } catch (e) {
       final err = ApiException.from(e);
       if (mounted) setState(() => _error = s.isHindi ? (err.messageHi ?? err.message) : err.message);

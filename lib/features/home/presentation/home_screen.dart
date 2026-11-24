@@ -24,6 +24,10 @@ import '../../gst/presentation/gst_text.dart';
 import '../../catalog/presentation/catalog_text.dart';
 import '../../orders/presentation/order_text.dart';
 import '../../voice/domain/voice_examples.dart';
+import '../../../core/l10n/common_text.dart';
+import '../../../design/widgets/form_bits.dart';
+import '../../profile/presentation/reach_settings.dart';
+import '../../shell/reach.dart';
 import '../data/home_repository.dart';
 import '../domain/home_models.dart';
 
@@ -35,6 +39,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
+    final helper = ref.watch(helperModeProvider);
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -47,18 +52,18 @@ class HomeScreen extends ConsumerWidget {
             data: (h) => ListView(
               padding: SutraSpace.page,
               children: [
+                if (helper) ...[const _HelperBanner(), const SizedBox(height: 12)],
                 _Hero(home: h, strings: s),
-                if (h.alerts.isNotEmpty) ...[const SizedBox(height: 14), _AlertStrip(alerts: h.alerts, strings: s)],
-                const SizedBox(height: 14),
-                _MoneyCard(home: h, strings: s),
+                if (!helper && h.alerts.isNotEmpty) ...[const SizedBox(height: 14), _AlertStrip(alerts: h.alerts, strings: s)],
+                if (!helper) ...[const SizedBox(height: 14), _MoneyCard(home: h, strings: s)],
                 const SizedBox(height: 14),
                 _OrdersCard(kpis: h.kpis, strings: s),
                 const SizedBox(height: 14),
                 _FlowCard(flow: h.flow, strings: s),
-                if (h.labour.workers > 0) ...[const SizedBox(height: 14), _TeamCard(labour: h.labour, strings: s)],
+                if (!helper && h.labour.workers > 0) ...[const SizedBox(height: 14), _TeamCard(labour: h.labour, strings: s)],
                 const SizedBox(height: 14),
                 _InputTiles(strings: s, example: VoiceExamples.forIndustry(h.producer.industry.key).first),
-                if (h.gst.registered) ...[const SizedBox(height: 14), _GstCard(gst: h.gst, strings: s)],
+                if (!helper && h.gst.registered) ...[const SizedBox(height: 14), _GstCard(gst: h.gst, strings: s)],
               ],
             ),
           ),
@@ -68,8 +73,36 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
+/// Helper (munim) mode is on: say so, and let the owner unlock with the PIN.
+class _HelperBanner extends ConsumerWidget {
+  const _HelperBanner();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    return Material(
+      color: SutraColors.haldiWash,
+      borderRadius: const BorderRadius.all(SutraRadius.md),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+        child: Row(
+          children: [
+            const Icon(Icons.supervisor_account_outlined, color: SutraColors.haldiDeep),
+            const SizedBox(width: 10),
+            Expanded(child: Text(s.tr(CommonText.helperOn), style: const TextStyle(fontWeight: FontWeight.w800, color: SutraColors.haldiDeep))),
+            TextButton.icon(
+              onPressed: () => showSutraSheet<void>(context, const PinSheet(start: false)),
+              icon: const Icon(Icons.lock_open_rounded, size: 18),
+              label: Text(s.tr(CommonText.unlock)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Routes that open on top of the tabs (back returns home); everything else switches tab.
-const _fullScreen = ['/gst', '/bill', '/order', '/catalog', '/invoice'];
+const _fullScreen = ['/gst', '/bill', '/order', '/catalog', '/invoice', '/prices', '/capacity'];
 
 /// The trade, alive: the producer's own industry scene with the greeting.
 class _Hero extends ConsumerWidget {
@@ -100,7 +133,7 @@ class _Hero extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           GestureDetector(
-                            onTap: () => context.go('/profile'),
+                            onTap: () => ref.read(helperModeProvider) ? null : context.go('/profile'),
                             child: InitialsBadge(name: p.name, color: hexColor(p.avatarColor), size: 40),
                           ),
                           const Spacer(),

@@ -26,7 +26,10 @@ import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/orders/presentation/order_screen.dart';
 import '../features/orders/presentation/orders_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import '../features/cluster/presentation/cluster_screens.dart';
 import '../features/shell/app_shell.dart';
+import '../features/shell/reach.dart';
+import '../features/stock/presentation/prices_screen.dart';
 import '../features/shell/splash_screen.dart';
 import '../features/voice/presentation/voice_screen.dart';
 
@@ -34,6 +37,7 @@ import '../features/voice/presentation/voice_screen.dart';
 class _SessionListenable extends ChangeNotifier {
   _SessionListenable(Ref ref) {
     ref.listen(sessionControllerProvider, (_, _) => notifyListeners());
+    ref.listen(helperModeProvider, (_, _) => notifyListeners());
   }
 }
 
@@ -58,8 +62,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         SignedOut() => at == '/login' ? null : '/login',
         // consent first (DPDP), then set up the business, then the app
         SignedIn(:final me) when me.user.needsConsent => at == '/consent' ? null : '/consent',
-        SignedIn(:final me) when me.user.needsOnboarding || (me.producer == null && me.buyer == null) => at == '/onboarding' ? null : '/onboarding',
+        SignedIn(:final me) when !me.isClusterAdmin && (me.user.needsOnboarding || (me.producer == null && me.buyer == null)) => at == '/onboarding' ? null : '/onboarding',
+        SignedIn(:final me) when me.isClusterAdmin => at == '/cluster' ? null : '/cluster',
         SignedIn(:final me) when me.isBuyer => _gates.contains(at) || !_isBuyerPath(at) ? '/bazaar' : null,
+        // helper (munim) mode: money screens stay closed until the owner's PIN
+        SignedIn() when ref.read(helperModeProvider) && blockedForHelper(at) => '/home',
         SignedIn() => _gates.contains(at) || _isBuyerPath(at) ? '/home' : null,
       };
     },
@@ -93,6 +100,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/my-order/:code', builder: (_, state) => BuyerOrderScreen(code: state.pathParameters['code']!)),
       // full-screen tasks opened from anywhere (back returns to where you were)
       GoRoute(path: '/capacity', builder: (_, _) => const CapacityScreen()),
+      GoRoute(path: '/prices', builder: (_, _) => const PricesScreen()),
+      // the cooperative / FPO secretary (C1-C5)
+      GoRoute(path: '/cluster', builder: (_, _) => const ClusterShell()),
       GoRoute(path: '/bill', builder: (_, _) => const BillScreen()),
       GoRoute(path: '/gst', builder: (_, _) => const GstScreen()),
       GoRoute(path: '/invoice/:id', builder: (_, state) => InvoiceScreen(id: state.pathParameters['id']!)),

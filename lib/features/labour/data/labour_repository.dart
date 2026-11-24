@@ -27,7 +27,7 @@ class HttpLabourRepository implements LabourRepository {
       ));
 
   @override
-  Future<void> addPieceWork(String workerId, {required double qty}) => _api.post('/labour/workers/$workerId/piece', body: {'qty': qty}, idempotent: true);
+  Future<void> addPieceWork(String workerId, {required double qty}) => _api.postQueueable('/labour/workers/$workerId/piece', body: {'qty': qty});
 
   @override
   Future<PayPreview> payPreview(String workerId) async => PayPreview.fromJson(await _api.get('/labour/workers/$workerId/pay-preview'));

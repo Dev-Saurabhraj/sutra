@@ -10,6 +10,7 @@ import '../../../design/widgets/form_bits.dart';
 import '../../../design/widgets/ledger_card.dart';
 import '../../../design/widgets/thread_stripe.dart';
 import '../../auth/presentation/session_controller.dart';
+import '../../profile/presentation/reach_settings.dart';
 import 'market_text.dart';
 
 /// The buyer's business as makers will bill it: name, place (decides IGST vs CGST + SGST), GSTIN.
@@ -65,7 +66,9 @@ class BuyerAccountScreen extends ConsumerWidget {
               selected: s.lang,
               onSelect: (l) => ref.read(langProvider.notifier).set(l),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
+            const PrivacyActions(),
+            const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () => ref.read(sessionControllerProvider.notifier).logout(),
               icon: const Icon(Icons.logout_rounded),

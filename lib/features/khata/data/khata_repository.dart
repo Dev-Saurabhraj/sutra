@@ -13,7 +13,7 @@ class HttpKhataRepository implements KhataRepository {
       KhataPage.fromJson(await _api.get('/khata', query: {'status': settled ? 'settled' : 'open'}));
 
   @override
-  Future<void> settle(String id) => _api.post('/khata/$id/settle', idempotent: true);
+  Future<void> settle(String id) => _api.postQueueable('/khata/$id/settle');
 
   @override
   Future<Reminder> reminder(String id) async => Reminder.fromJson(await _api.get('/khata/$id/reminder'));

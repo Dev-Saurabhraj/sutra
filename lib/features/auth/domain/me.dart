@@ -1,23 +1,37 @@
 /// The logged-in user and, once onboarded, their business: a maker/seller (producer) or a buyer.
 class Me {
-  const Me({required this.user, required this.producer, required this.consentVersion, this.buyer});
+  const Me({required this.user, required this.producer, required this.consentVersion, this.buyer, this.cluster});
 
   final SessionUser user;
   final ProducerProfile? producer;
   final BuyerProfile? buyer;
+
+  /// Set for a cluster admin (cooperative / FPO secretary).
+  final ClusterBrief? cluster;
   final String consentVersion;
 
   /// Buyers get the marketplace (Bazaar), makers get the bahi.
   bool get isBuyer => buyer != null;
+  bool get isClusterAdmin => cluster != null;
 
   factory Me.fromJson(Map<String, dynamic> j) => Me(
         user: SessionUser.fromJson(j['user'] as Map<String, dynamic>),
         producer: j['producer'] == null ? null : ProducerProfile.fromJson(j['producer'] as Map<String, dynamic>),
         buyer: j['buyer'] == null ? null : BuyerProfile.fromJson(j['buyer'] as Map<String, dynamic>),
+        cluster: j['cluster'] == null ? null : ClusterBrief.fromJson(j['cluster'] as Map<String, dynamic>),
         consentVersion: j['consentVersion'] as String,
       );
 
-  Me copyWith({SessionUser? user}) => Me(user: user ?? this.user, producer: producer, buyer: buyer, consentVersion: consentVersion);
+  Me copyWith({SessionUser? user}) => Me(user: user ?? this.user, producer: producer, buyer: buyer, cluster: cluster, consentVersion: consentVersion);
+}
+
+class ClusterBrief {
+  const ClusterBrief({required this.id, required this.name, required this.city});
+  final String id;
+  final String name;
+  final String city;
+
+  factory ClusterBrief.fromJson(Map<String, dynamic> j) => ClusterBrief(id: j['id'] as String, name: j['name'] as String, city: j['city'] as String);
 }
 
 /// A shop, boutique or exporter buying from makers.
