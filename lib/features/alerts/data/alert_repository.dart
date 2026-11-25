@@ -10,6 +10,12 @@ class HttpAlertRepository implements AlertRepository {
 
   @override
   Future<void> markRead(String id) => _api.post('/alerts/$id/read');
+
+  @override
+  Future<List<AlertItem>> unread() async {
+    final j = await _api.get('/alerts', query: {'unread': 'true'});
+    return [for (final a in (j['alerts'] as List).cast<Map<String, dynamic>>()) AlertItem.fromJson(a)];
+  }
 }
 
 final alertRepositoryProvider = Provider<AlertRepository>((ref) => HttpAlertRepository(ref.watch(apiClientProvider)));

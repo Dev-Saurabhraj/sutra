@@ -1,0 +1,21 @@
+{
+  // Web: a fixed port keeps the same browser origin between runs, so the saved login survives restarts
+  // (a random port is a new "site" every time, with empty storage).
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Sutra (Chrome, port 5173)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "args": ["--web-port", "5173"]
+    },
+    {
+      "name": "Sutra (phone)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart"
+    }
+  ]
+}

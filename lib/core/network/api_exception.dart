@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import 'outbox.dart';
+
 /// One error type for the UI. Carries the server's `{ error: { code, message, details } }`.
 class ApiException implements Exception {
   const ApiException({required this.code, required this.message, this.messageHi, this.status});
@@ -14,6 +16,14 @@ class ApiException implements Exception {
 
   factory ApiException.from(Object error) {
     if (error is ApiException) return error;
+    // not a failure: kept on the phone to send later (P27)
+    if (error is SavedOffline) {
+      return const ApiException(
+        code: 'SAVED_OFFLINE',
+        message: 'No network: saved on the phone, it will go out when you are online.',
+        messageHi: 'नेट नहीं है: फ़ोन में सेव किया, नेट आते ही भेज देंगे।',
+      );
+    }
     if (error is DioException) {
       final data = error.response?.data;
       if (data is Map && data['error'] is Map) {

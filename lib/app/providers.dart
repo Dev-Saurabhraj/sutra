@@ -7,6 +7,7 @@ import '../core/device/speaker.dart';
 import '../core/device/voice_input.dart';
 import '../core/l10n/app_strings.dart';
 import '../core/network/api_client.dart';
+import '../core/network/outbox.dart';
 import '../core/storage/token_store.dart';
 import '../features/auth/presentation/session_controller.dart';
 
@@ -16,11 +17,17 @@ final sharedPrefsProvider = Provider<SharedPreferences>((_) => throw Unimplement
 
 final tokenStoreProvider = Provider<TokenStore>((_) => SecureTokenStore());
 
+/// Entries waiting on the phone for the network (P27).
+final outboxCountProvider = StateProvider<int>((ref) => 0);
+
 final apiClientProvider = Provider<ApiClient>((ref) {
+  final outbox = Outbox(ref.watch(sharedPrefsProvider), onChanged: (n) => ref.read(outboxCountProvider.notifier).state = n);
+  Future.microtask(() => ref.read(outboxCountProvider.notifier).state = outbox.count);
   return ApiClient(
     baseUrl: AppConfig.apiBaseUrl,
     tokens: ref.watch(tokenStoreProvider),
     onSessionExpired: () => ref.read(sessionControllerProvider.notifier).expired(),
+    outbox: outbox,
   );
 });
 

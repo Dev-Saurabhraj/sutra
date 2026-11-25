@@ -16,6 +16,19 @@ Demo login: `98000 00001` with dev code `123456`.
 
 Checks: `flutter analyze` · `flutter test`.
 
+### Staying logged in
+
+The login is saved on the device (secure storage) and renewed automatically for 30 days.
+- **Web:** run on a fixed port (`flutter run -d chrome --web-port 5173`, or the "Sutra (Chrome, port 5173)" launch
+  config). A random port is a new site to the browser, with an empty login store.
+- **Phone:** stays logged in across restarts; uninstalling the app clears it.
+
+### Voice (mic)
+
+- **Android:** allow the microphone when asked; Google's speech service must be installed (it is on most phones).
+  Hindi needs the Hindi offline/online speech pack; without it the phone's own language is used.
+- **Web:** Chrome only, and only on `localhost` or `https` (browsers block the mic on plain `http://192.168…`).
+
 ## Structure
 
 ```
@@ -37,7 +50,10 @@ lib/
 Features: `auth` (OTP login for any number, DPDP consent) · `onboarding` (9 steps, any industry, maker/trader) ·
 `home` (visual Aaj) · `inventory` (goods thread: supplier → raw → making → ready → client) · `labour` (roll call,
 wages, advances, wage slips) · `voice` (speak → preview → confirm) · `khata` (ledger, MSME clock, reminders) ·
-`stock` (material models, spool rows, reorder) · `profile` · `alerts` · `shell` (woven nav).
+`stock` (material models, spool rows, reorder) · `bills` (snap a bill → checked draft → stock + ITC) ·
+`gst` (period summary by scheme, issues, CA exports, invoices + PDF share) · `orders` (inbox, "can I deliver?",
+price check, dispatch, translated letters) · `catalog` (photo → story → price → publish) · `profile` · `alerts` ·
+`shell` (woven nav).
 
 Animated illustrations live in `lib/design/art/` (see `docs/DESIGN.md`). Feature text lives in per-feature phrase
 catalogs (`T('हिंदी', 'English')`, resolved with `strings.tr(...)`).

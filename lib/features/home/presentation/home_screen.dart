@@ -19,7 +19,15 @@ import '../../alerts/domain/alert_models.dart';
 import '../../inventory/presentation/inventory_screen.dart';
 import '../../inventory/presentation/inventory_text.dart';
 import '../../labour/presentation/labour_text.dart';
+import '../../bills/presentation/bill_text.dart';
+import '../../gst/presentation/gst_text.dart';
+import '../../catalog/presentation/catalog_text.dart';
+import '../../orders/presentation/order_text.dart';
 import '../../voice/domain/voice_examples.dart';
+import '../../../core/l10n/common_text.dart';
+import '../../../design/widgets/form_bits.dart';
+import '../../profile/presentation/reach_settings.dart';
+import '../../shell/reach.dart';
 import '../data/home_repository.dart';
 import '../domain/home_models.dart';
 
@@ -31,6 +39,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(stringsProvider);
+    final helper = ref.watch(helperModeProvider);
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -43,15 +52,18 @@ class HomeScreen extends ConsumerWidget {
             data: (h) => ListView(
               padding: SutraSpace.page,
               children: [
+                if (helper) ...[const _HelperBanner(), const SizedBox(height: 12)],
                 _Hero(home: h, strings: s),
-                if (h.alerts.isNotEmpty) ...[const SizedBox(height: 14), _AlertStrip(alerts: h.alerts, strings: s)],
+                if (!helper && h.alerts.isNotEmpty) ...[const SizedBox(height: 14), _AlertStrip(alerts: h.alerts, strings: s)],
+                if (!helper) ...[const SizedBox(height: 14), _MoneyCard(home: h, strings: s)],
                 const SizedBox(height: 14),
-                _MoneyCard(home: h, strings: s),
+                _OrdersCard(kpis: h.kpis, strings: s),
                 const SizedBox(height: 14),
                 _FlowCard(flow: h.flow, strings: s),
-                if (h.labour.workers > 0) ...[const SizedBox(height: 14), _TeamCard(labour: h.labour, strings: s)],
+                if (!helper && h.labour.workers > 0) ...[const SizedBox(height: 14), _TeamCard(labour: h.labour, strings: s)],
                 const SizedBox(height: 14),
-                _SpeakBar(strings: s, example: VoiceExamples.forIndustry(h.producer.industry.key).first),
+                _InputTiles(strings: s, example: VoiceExamples.forIndustry(h.producer.industry.key).first),
+                if (!helper && h.gst.registered) ...[const SizedBox(height: 14), _GstCard(gst: h.gst, strings: s)],
               ],
             ),
           ),
@@ -60,6 +72,37 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 }
+
+/// Helper (munim) mode is on: say so, and let the owner unlock with the PIN.
+class _HelperBanner extends ConsumerWidget {
+  const _HelperBanner();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(stringsProvider);
+    return Material(
+      color: SutraColors.haldiWash,
+      borderRadius: const BorderRadius.all(SutraRadius.md),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
+        child: Row(
+          children: [
+            const Icon(Icons.supervisor_account_outlined, color: SutraColors.haldiDeep),
+            const SizedBox(width: 10),
+            Expanded(child: Text(s.tr(CommonText.helperOn), style: const TextStyle(fontWeight: FontWeight.w800, color: SutraColors.haldiDeep))),
+            TextButton.icon(
+              onPressed: () => showSutraSheet<void>(context, const PinSheet(start: false)),
+              icon: const Icon(Icons.lock_open_rounded, size: 18),
+              label: Text(s.tr(CommonText.unlock)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Routes that open on top of the tabs (back returns home); everything else switches tab.
+const _fullScreen = ['/gst', '/bill', '/order', '/catalog', '/invoice', '/prices', '/capacity', '/schemes'];
 
 /// The trade, alive: the producer's own industry scene with the greeting.
 class _Hero extends ConsumerWidget {
@@ -90,7 +133,7 @@ class _Hero extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           GestureDetector(
-                            onTap: () => context.go('/profile'),
+                            onTap: () => ref.read(helperModeProvider) ? null : context.go('/profile'),
                             child: InitialsBadge(name: p.name, color: hexColor(p.avatarColor), size: 40),
                           ),
                           const Spacer(),
@@ -146,6 +189,8 @@ class _AlertStrip extends ConsumerWidget {
             'LOW_STOCK' => (Icons.warning_amber_rounded, SutraColors.kumkum),
             'ORDER' => (Icons.shopping_bag_outlined, SutraColors.haldiDeep),
             'PAYMENT' => (Icons.currency_rupee_rounded, SutraColors.sindoor),
+            'GST' => (Icons.receipt_long_outlined, SutraColors.kumkum),
+            'PRICE' => (Icons.trending_up_rounded, SutraColors.kumkum),
             _ => (Icons.info_outline_rounded, SutraColors.neel),
           };
           return ActionChip(
@@ -157,7 +202,13 @@ class _AlertStrip extends ConsumerWidget {
                 ? null
                 : () {
                     ref.read(alertRepositoryProvider).markRead(a.id);
-                    context.go(a.route == '/stock' ? '/inventory' : a.route!);
+                    final route = a.route == '/stock' ? '/inventory' : a.route!;
+                    // full-screen tasks open on top (back returns home); tabs switch in place
+                    if (_fullScreen.any(route.startsWith)) {
+                      context.push(route);
+                    } else {
+                      context.go(route);
+                    }
                   },
           );
         },
@@ -307,9 +358,9 @@ class _TeamCard extends StatelessWidget {
   }
 }
 
-/// A slim reminder that speaking is the fastest way in.
-class _SpeakBar extends StatelessWidget {
-  const _SpeakBar({required this.strings, required this.example});
+/// The two ways in that need no typing: speak, or photograph a bill.
+class _InputTiles extends StatelessWidget {
+  const _InputTiles({required this.strings, required this.example});
   final AppStrings strings;
 
   /// Something this producer's trade would actually say.
@@ -317,27 +368,142 @@ class _SpeakBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: _InputTile(color: SutraColors.neel, icon: Icons.mic_rounded, title: strings.speakCta, sub: '“$example”', onTap: () => context.go('/voice'))),
+        const SizedBox(width: 12),
+        Expanded(child: _InputTile(color: SutraColors.sindoor, icon: Icons.photo_camera_outlined, title: strings.tr(BillText.title), sub: strings.tr(BillText.subtitle), onTap: () => context.push('/bill'))),
+      ],
+    );
+  }
+}
+
+class _InputTile extends StatelessWidget {
+  const _InputTile({required this.color, required this.icon, required this.title, required this.sub, required this.onTap});
+  final Color color;
+  final IconData icon;
+  final String title;
+  final String sub;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
     return Material(
-      color: SutraColors.neel,
+      color: color,
       borderRadius: const BorderRadius.all(SutraRadius.lg),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: const BorderRadius.all(SutraRadius.lg),
-        onTap: () => context.go('/voice'),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          child: Row(
-            children: [
-              const Icon(Icons.mic_rounded, color: Colors.white),
-              const SizedBox(width: 12),
-              Text(strings.speakCta, style: SutraType.display(17, color: Colors.white)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text('“$example”', textAlign: TextAlign.end, maxLines: 1, style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 12), overflow: TextOverflow.ellipsis),
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(icon, color: Colors.white, size: 28),
+                  const SizedBox(height: 10),
+                  Text(title, style: SutraType.display(17, color: Colors.white)),
+                  const SizedBox(height: 2),
+                  Text(sub, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 12)),
+                ],
               ),
-            ],
-          ),
+            ),
+            const ThreadStripe(height: 3),
+          ],
         ),
       ),
     );
   }
+}
+
+/// This month's GST in one glance: what goes to the government, and whether anything needs fixing.
+class _GstCard extends StatelessWidget {
+  const _GstCard({required this.gst, required this.strings});
+  final HomeGst gst;
+  final AppStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = strings;
+    return _Card(
+      onTap: () => context.push('/gst'),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(color: SutraColors.sindoorWash, shape: BoxShape.circle),
+            child: const Text('GST', style: TextStyle(color: SutraColors.sindoorDeep, fontWeight: FontWeight.w800)),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${s.tr(GstText.payable)} · ${gst.period}', style: Theme.of(context).textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                AmountText(gst.due, size: 22, incoming: false),
+              ],
+            ),
+          ),
+          Stamp(gst.issues == 0 ? s.tr(GstText.allGood) : '${gst.issues} ${s.tr(GstText.fix)}', tone: gst.issues == 0 ? Tone.ok : Tone.critical, size: 10),
+        ],
+      ),
+    );
+  }
+}
+
+/// Orders at a glance: new requests waiting for an answer (the one thing buyers wait on), and what is being made.
+class _OrdersCard extends StatelessWidget {
+  const _OrdersCard({required this.kpis, required this.strings});
+  final HomeKpis kpis;
+  final AppStrings strings;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = strings;
+    final text = Theme.of(context).textTheme;
+    return _Card(
+      onTap: () => context.push('/orders'),
+      child: Row(
+        children: [
+          _Count(n: kpis.newRequests, label: s.tr(OrderText.tabNew), color: kpis.newRequests > 0 ? SutraColors.sindoor : SutraColors.inkSoft),
+          Container(width: 1, height: 44, margin: const EdgeInsets.symmetric(horizontal: 14), color: SutraColors.rule),
+          _Count(n: kpis.openOrders, label: s.tr(OrderText.tabActive), color: SutraColors.neel),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(s.tr(OrderText.title), style: text.titleSmall),
+              const SizedBox(height: 4),
+              TextButton.icon(
+                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8), minimumSize: const Size(0, 36)),
+                onPressed: () => context.push('/catalog'),
+                icon: const Icon(Icons.auto_stories_outlined, size: 18),
+                label: Text(s.tr(CatalogText.title)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Count extends StatelessWidget {
+  const _Count({required this.n, required this.label, required this.color});
+  final int n;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('$n', style: SutraType.figure(26, color: color)),
+          Text(label, style: Theme.of(context).textTheme.labelMedium),
+        ],
+      );
 }

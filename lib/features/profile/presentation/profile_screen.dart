@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/l10n/app_strings.dart';
@@ -9,6 +10,14 @@ import '../../../design/widgets/bits.dart';
 import '../../../design/widgets/ledger_card.dart';
 import '../../../design/widgets/thread_stripe.dart';
 import '../../auth/presentation/session_controller.dart';
+import '../../gst/presentation/gst_text.dart';
+import '../../../core/l10n/common_text.dart';
+import '../../capacity/presentation/capacity_text.dart';
+import '../../money/money_text.dart';
+import '../../scale/scale_screens.dart';
+import 'reach_settings.dart';
+import '../../catalog/presentation/catalog_text.dart';
+import '../../orders/presentation/order_text.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -60,12 +69,74 @@ class ProfileScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/gst'),
+                icon: const Icon(Icons.receipt_long_outlined),
+                label: Text(s.tr(GstText.title)),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/orders'),
+                      icon: const Icon(Icons.shopping_bag_outlined),
+                      label: Text(s.tr(OrderText.title)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/catalog'),
+                      icon: const Icon(Icons.auto_stories_outlined),
+                      label: Text(s.tr(CatalogText.title)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/capacity'),
+                icon: const Icon(Icons.event_busy_outlined),
+                label: Text(s.tr(CapText.title)),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/prices'),
+                icon: const Icon(Icons.trending_up_rounded),
+                label: Text(s.tr(CommonText.prices)),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/schemes'),
+                icon: const Icon(Icons.account_balance_outlined),
+                label: Text(s.tr(MoneyText.schemes)),
+              ),
+              const SizedBox(height: 8),
+              Row(children: [
+                Expanded(child: OutlinedButton.icon(onPressed: () => context.push('/ondc'), icon: const Icon(Icons.hub_outlined), label: Text(s.tr(ScaleText.ondc)))),
+                const SizedBox(width: 8),
+                Expanded(child: OutlinedButton.icon(onPressed: () => context.push('/early-pay'), icon: const Icon(Icons.bolt_rounded), label: Text(s.tr(ScaleText.earlyPay)))),
+              ]),
+              if (p.clusterName == null) ...[
+                const SizedBox(height: 8),
+                OutlinedButton.icon(onPressed: () => context.push('/clusters'), icon: const Icon(Icons.groups_2_outlined), label: Text(s.tr(ScaleText.cluster))),
+              ],
+              SectionHeader(s.tr(ScaleText.ca)),
+              const CaAccessCard(),
+              SectionHeader(s.tr(CommonText.helperMode)),
+              const HelperModeCard(),
             ],
+            const SizedBox(height: 8),
+            const VoiceAlertsSwitch(),
             SectionHeader(s.language),
             _LanguagePicker(strings: s),
             SectionHeader(s.privacy),
             Text(s.consentPoints.join('\n'), style: text.bodySmall),
-            const SizedBox(height: 28),
+            const SizedBox(height: 12),
+            const PrivacyActions(),
+            const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () => ref.read(sessionControllerProvider.notifier).logout(),
               icon: const Icon(Icons.logout_rounded),

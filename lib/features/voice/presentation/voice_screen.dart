@@ -11,6 +11,8 @@ import '../../../design/widgets/stamp.dart';
 import '../../auth/presentation/session_controller.dart';
 import '../domain/voice_examples.dart';
 import '../domain/voice_models.dart';
+import '../../../core/l10n/common_text.dart';
+import '../../shell/reach.dart';
 import 'voice_controller.dart';
 
 class VoiceScreen extends ConsumerStatefulWidget {
@@ -113,7 +115,7 @@ class _VoiceScreenState extends ConsumerState<VoiceScreen> {
   }
 }
 
-class _PreviewSlip extends StatelessWidget {
+class _PreviewSlip extends ConsumerWidget {
   const _PreviewSlip({required this.preview, required this.strings, required this.saving, required this.onYes, required this.onNo});
 
   final VoicePreview preview;
@@ -123,8 +125,10 @@ class _PreviewSlip extends StatelessWidget {
   final VoidCallback onNo;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
+    final helperMoney = ref.watch(helperModeProvider) && preview.actions.any((a) => helperMoneyKinds.contains(a.kind));
+    final canSave = preview.canSave && !helperMoney;
     return Parchi(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -135,6 +139,8 @@ class _PreviewSlip extends StatelessWidget {
           Text(strings.shallIWrite, style: SutraType.display(22)),
           const SizedBox(height: 10),
           for (final a in preview.actions) _ActionLine(action: a, strings: strings),
+          if (helperMoney)
+            Padding(padding: const EdgeInsets.only(top: 6), child: Text(strings.tr(CommonText.helperNoMoney), style: text.bodySmall?.copyWith(color: SutraColors.kumkum))),
           const SizedBox(height: 14),
           Row(
             children: [
@@ -143,11 +149,11 @@ class _PreviewSlip extends StatelessWidget {
               Expanded(
                 flex: 2,
                 child: FilledButton.icon(
-                  onPressed: saving || !preview.canSave ? null : onYes,
+                  onPressed: saving || !canSave ? null : onYes,
                   icon: saving
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white))
                       : const Icon(Icons.edit_note_rounded),
-                  label: Text(preview.canSave ? strings.yesWrite : strings.cannotSave),
+                  label: Text(canSave ? strings.yesWrite : strings.cannotSave),
                 ),
               ),
             ],

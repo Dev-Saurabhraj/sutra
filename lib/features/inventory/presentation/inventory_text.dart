@@ -16,6 +16,7 @@ abstract final class InvText {
   static const traderMakingHint = T('आप ख़रीदकर बेचते हैं, इसलिए बनाना नहीं।', 'You buy and resell, so there is no making step.');
 
   static const stockIn = T('माल आया', 'Stock in');
+  static const fromBill = T('बिल की फ़ोटो से माल चढ़ाएँ', 'Stock in from a bill photo');
   static const made = T('बनाया', 'Made');
   static const sold = T('बेचा', 'Sold');
   static const count = T('गिनती', 'Count');

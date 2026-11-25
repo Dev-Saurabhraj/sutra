@@ -73,8 +73,29 @@ class HomeLabour {
       );
 }
 
+/// This month's GST in one line: what goes to the government and how many things need fixing.
+class HomeGst {
+  const HomeGst({required this.scheme, required this.period, required this.due, required this.itc, required this.issues});
+
+  final String scheme;
+  final String period;
+  final double due;
+  final double itc;
+  final int issues;
+
+  bool get registered => scheme != 'UNREGISTERED';
+
+  factory HomeGst.fromJson(Map<String, dynamic> j) => HomeGst(
+        scheme: j['scheme'] as String,
+        period: j['period'] as String,
+        due: (j['due'] as num).toDouble(),
+        itc: (j['itc'] as num).toDouble(),
+        issues: (j['issues'] as num).toInt(),
+      );
+}
+
 class HomeSummary {
-  const HomeSummary({required this.producer, required this.greeting, required this.spoken, required this.alerts, required this.kpis, required this.flow, required this.labour, required this.materials});
+  const HomeSummary({required this.producer, required this.greeting, required this.spoken, required this.alerts, required this.kpis, required this.flow, required this.labour, required this.gst, required this.materials});
 
   final ProducerProfile producer;
   final Bilingual greeting;
@@ -83,6 +104,7 @@ class HomeSummary {
   final HomeKpis kpis;
   final HomeFlow flow;
   final HomeLabour labour;
+  final HomeGst gst;
   final List<MaterialHealth> materials;
 
   factory HomeSummary.fromJson(Map<String, dynamic> j) => HomeSummary(
@@ -93,6 +115,7 @@ class HomeSummary {
         kpis: HomeKpis.fromJson(j['kpis'] as Map<String, dynamic>),
         flow: HomeFlow.fromJson(j['flow'] as Map<String, dynamic>),
         labour: HomeLabour.fromJson(j['labour'] as Map<String, dynamic>),
+        gst: HomeGst.fromJson(j['gst'] as Map<String, dynamic>),
         materials: (j['materials'] as List).map((e) => MaterialHealth.fromJson(e as Map<String, dynamic>)).toList(),
       );
 }

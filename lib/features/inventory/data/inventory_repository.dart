@@ -45,11 +45,11 @@ class HttpInventoryRepository implements InventoryRepository {
 
   @override
   Future<void> stockIn(String materialId, {required double qty, double? rate, String? supplierId}) =>
-      _api.post('/inventory/materials/$materialId/stock-in', body: {'qty': qty, 'rate': ?rate, 'supplierId': ?supplierId}, idempotent: true);
+      _api.postQueueable('/inventory/materials/$materialId/stock-in', body: {'qty': qty, 'rate': ?rate, 'supplierId': ?supplierId});
 
   @override
   Future<void> produce(String productId, {required int qty, String? workerId}) =>
-      _api.post('/inventory/products/$productId/produce', body: {'qty': qty, 'workerId': ?workerId}, idempotent: true);
+      _api.postQueueable('/inventory/products/$productId/produce', body: {'qty': qty, 'workerId': ?workerId});
 
   @override
   Future<SaleResult> sell(String productId, {required int qty, double? rate, String? clientId, String? walkInName, String? walkInCity}) async {
@@ -68,10 +68,10 @@ class HttpInventoryRepository implements InventoryRepository {
   }
 
   @override
-  Future<void> adjustMaterial(String materialId, double actual) => _api.post('/inventory/materials/$materialId/adjust', body: {'actual': actual}, idempotent: true);
+  Future<void> adjustMaterial(String materialId, double actual) => _api.postQueueable('/inventory/materials/$materialId/adjust', body: {'actual': actual});
 
   @override
-  Future<void> adjustProduct(String productId, int actual) => _api.post('/inventory/products/$productId/adjust', body: {'actual': actual}, idempotent: true);
+  Future<void> adjustProduct(String productId, int actual) => _api.postQueueable('/inventory/products/$productId/adjust', body: {'actual': actual});
 
   @override
   Future<List<Movement>> movements({String? materialId, String? productId}) async {

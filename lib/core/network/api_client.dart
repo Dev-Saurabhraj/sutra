@@ -1,13 +1,15 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
 import '../storage/token_store.dart';
+import 'outbox.dart';
 import 'api_exception.dart';
 
 /// Thin HTTP client: adds the access token, refreshes it once on 401, and maps errors to [ApiException].
 class ApiClient {
-  ApiClient({required String baseUrl, required TokenStore tokens, required void Function() onSessionExpired})
+  ApiClient({required String baseUrl, required TokenStore tokens, required void Function() onSessionExpired, this.outbox})
       : _tokens = tokens,
         _onSessionExpired = onSessionExpired,
         _dio = Dio(BaseOptions(
@@ -21,6 +23,10 @@ class ApiClient {
 
   final Dio _dio;
   final TokenStore _tokens;
+
+  /// Where entries wait when there's no network (P27). Null in tests.
+  final Outbox? outbox;
+  bool _flushing = false;
   final void Function() _onSessionExpired;
 
   Future<Map<String, dynamic>> get(String path, {Map<String, dynamic>? query}) =>
@@ -32,6 +38,58 @@ class ApiClient {
       );
 
   Future<Map<String, dynamic>> put(String path, {Object? body}) => _send(() => _dio.put<dynamic>(path, data: body));
+
+  Future<Map<String, dynamic>> patch(String path, {Object? body}) => _send(() => _dio.patch<dynamic>(path, data: body));
+
+  Future<Map<String, dynamic>> delete(String path) => _send(() => _dio.delete<dynamic>(path));
+
+  /// An entry that may be made offline (stock in, made, counted, khata settled…): if the network is down it is kept
+  /// on the phone and [SavedOffline] is thrown, so the screen can say "saved on the phone".
+  Future<void> postQueueable(String path, {Object? body}) async {
+    final key = newIdempotencyKey();
+    try {
+      await _send(() => _dio.post<dynamic>(path, data: body, options: Options(headers: {'Idempotency-Key': key})));
+    } on ApiException catch (e) {
+      final box = outbox;
+      if (!e.isOffline || box == null) rethrow;
+      await box.add(OutboxItem(path: path, body: body, key: key, at: DateTime.now()));
+      throw const SavedOffline();
+    }
+  }
+
+  /// Send what waited on the phone, oldest first, with the original keys (a resend never saves twice).
+  /// Returns how many went out. Stops at the first network failure; drops an entry the server refuses.
+  Future<int> flushOutbox() async {
+    final box = outbox;
+    if (box == null || _flushing || box.count == 0) return 0;
+    _flushing = true;
+    var sent = 0;
+    try {
+      for (final item in box.items) {
+        try {
+          await _send(() => _dio.post<dynamic>(item.path, data: item.body, options: Options(headers: {'Idempotency-Key': item.key})));
+          await box.remove(item.key);
+          sent++;
+        } on ApiException catch (e) {
+          if (e.isOffline) break;
+          await box.remove(item.key); // refused (e.g. already counted, product deleted): don't block the rest
+        }
+      }
+    } finally {
+      _flushing = false;
+    }
+    return sent;
+  }
+
+  /// Downloads a file (PDF, CSV…) as raw bytes.
+  Future<Uint8List> getBytes(String path, {Map<String, dynamic>? query}) async {
+    try {
+      final res = await _dio.get<List<int>>(path, queryParameters: query, options: Options(responseType: ResponseType.bytes));
+      return Uint8List.fromList(res.data ?? const []);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
 
   Future<Map<String, dynamic>> _send(Future<Response<dynamic>> Function() request) async {
     try {

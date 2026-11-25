@@ -24,4 +24,5 @@ class AlertItem {
 
 abstract interface class AlertRepository {
   Future<void> markRead(String id);
+  Future<List<AlertItem>> unread();
 }
