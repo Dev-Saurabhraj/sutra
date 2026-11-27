@@ -13,6 +13,7 @@ import '../../auth/presentation/session_controller.dart';
 import '../../gst/presentation/gst_text.dart';
 import '../../../core/l10n/common_text.dart';
 import '../../capacity/presentation/capacity_text.dart';
+import '../../fta/presentation/fta_text.dart';
 import '../../money/money_text.dart';
 import '../../scale/scale_screens.dart';
 import 'reach_settings.dart';
@@ -119,6 +120,12 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(child: OutlinedButton.icon(onPressed: () => context.push('/early-pay'), icon: const Icon(Icons.bolt_rounded), label: Text(s.tr(ScaleText.earlyPay)))),
               ]),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => context.push('/fta'),
+                icon: const Icon(Icons.public_rounded),
+                label: Text(s.tr(FtaText.title)),
+              ),
               if (p.clusterName == null) ...[
                 const SizedBox(height: 8),
                 OutlinedButton.icon(onPressed: () => context.push('/clusters'), icon: const Icon(Icons.groups_2_outlined), label: Text(s.tr(ScaleText.cluster))),
