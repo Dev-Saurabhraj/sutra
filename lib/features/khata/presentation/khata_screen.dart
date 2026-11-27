@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/format/formatters.dart';
@@ -26,6 +27,19 @@ class KhataScreen extends ConsumerStatefulWidget {
 class _KhataScreenState extends ConsumerState<KhataScreen> {
   bool _settled = false;
 
+  Future<void> _export() async {
+    final s = ref.read(stringsProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final bytes = await ref.read(khataRepositoryProvider).exportCsv(settled: _settled);
+      final name = khataExportFilename(settled: _settled, now: DateTime.now());
+      await SharePlus.instance.share(ShareParams(files: [XFile.fromData(bytes, name: name, mimeType: 'text/csv')], fileNameOverrides: [name]));
+    } catch (e) {
+      final err = ApiException.from(e);
+      messenger.showSnackBar(SnackBar(content: Text(s.isHindi ? (err.messageHi ?? err.message) : err.message)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
@@ -38,7 +52,16 @@ class _KhataScreenState extends ConsumerState<KhataScreen> {
           child: ListView(
             padding: SutraSpace.page,
             children: [
-              Text(s.khataTitle, style: SutraType.display(28)),
+              Row(
+                children: [
+                  Expanded(child: Text(s.khataTitle, style: SutraType.display(28))),
+                  IconButton(
+                    tooltip: s.khataExport,
+                    onPressed: () => _export(),
+                    icon: const Icon(Icons.ios_share_rounded),
+                  ),
+                ],
+              ),
               const SizedBox(height: 14),
               AsyncView<KhataPage>(
                 value: page,

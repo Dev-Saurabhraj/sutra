@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/providers.dart';
@@ -17,6 +19,10 @@ class HttpKhataRepository implements KhataRepository {
 
   @override
   Future<Reminder> reminder(String id) async => Reminder.fromJson(await _api.get('/khata/$id/reminder'));
+
+  @override
+  Future<Uint8List> exportCsv({required bool settled}) =>
+      _api.getBytes('/khata/export.csv', query: {'status': settled ? 'settled' : 'open'});
 }
 
 final khataRepositoryProvider = Provider<KhataRepository>((ref) => HttpKhataRepository(ref.watch(apiClientProvider)));

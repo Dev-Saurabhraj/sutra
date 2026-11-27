@@ -43,6 +43,7 @@ void main() {
         expect(s.lastsDays(6), contains('6'));
         expect(s.msmeDaysLeft(-1), isNotEmpty);
         expect(s.schemeName('COMPOSITION'), isNotEmpty);
+        expect(s.khataExport, isNotEmpty);
       }
       expect(AppStrings.of(AppLang.hi).pick('धागा', 'yarn'), 'धागा');
       expect(AppStrings.of(AppLang.en).pick('धागा', 'yarn'), 'yarn');
@@ -87,6 +88,11 @@ void main() {
       });
       expect(e.incoming, isTrue);
       expect(e.msmeDaysLeft, 7);
+    });
+
+    test('khata export filename follows the tab and the date', () {
+      expect(khataExportFilename(settled: false, now: DateTime(2026, 11, 24)), 'khata-open-2026-11-24.csv');
+      expect(khataExportFilename(settled: true, now: DateTime(2026, 11, 24)), 'khata-settled-2026-11-24.csv');
     });
   });
 

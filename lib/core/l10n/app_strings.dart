@@ -139,6 +139,7 @@ abstract class AppStrings {
   String get nothingHere;
   String get stampDue;
   String get stampPaid;
+  String get khataExport;
 
   // profile
   String get profileTitle;

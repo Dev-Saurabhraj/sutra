@@ -188,6 +188,8 @@ class EnglishStrings extends AppStrings {
   String get stampDue => 'DUE';
   @override
   String get stampPaid => 'PAID';
+  @override
+  String get khataExport => 'Export CSV';
 
   @override
   String get profileTitle => 'My business';

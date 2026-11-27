@@ -184,6 +184,8 @@ class HindiStrings extends AppStrings {
   String get stampDue => 'बाकी';
   @override
   String get stampPaid => 'चुकता';
+  @override
+  String get khataExport => 'CSV भेजें';
 
   @override
   String get profileTitle => 'मेरा कारोबार';

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class KhataEntry {
   const KhataEntry({
     required this.id,
@@ -73,4 +75,9 @@ abstract interface class KhataRepository {
   Future<KhataPage> page({required bool settled});
   Future<void> settle(String id);
   Future<Reminder> reminder(String id);
+  Future<Uint8List> exportCsv({required bool settled});
 }
+
+/// The CSV file name for a khata export, keyed by the tab the maker is looking at.
+String khataExportFilename({required bool settled, required DateTime now}) =>
+    'khata-${settled ? 'settled' : 'open'}-${now.toIso8601String().substring(0, 10)}.csv';
