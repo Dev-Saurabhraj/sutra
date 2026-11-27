@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/consent_screen.dart';
 import '../features/bills/presentation/bill_screen.dart';
 import '../features/capacity/presentation/capacity_screen.dart';
+import '../features/fta/presentation/fta_screen.dart';
 import '../features/catalog/presentation/catalog_screen.dart';
 import '../features/catalog/presentation/listing_screen.dart';
 import '../features/gst/presentation/gst_screen.dart';
@@ -103,6 +104,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/my-order/:code', builder: (_, state) => BuyerOrderScreen(code: state.pathParameters['code']!)),
       // full-screen tasks opened from anywhere (back returns to where you were)
       GoRoute(path: '/capacity', builder: (_, _) => const CapacityScreen()),
+      GoRoute(path: '/fta', builder: (_, _) => const FtaScreen()),
       GoRoute(path: '/prices', builder: (_, _) => const PricesScreen()),
       GoRoute(path: '/schemes', builder: (_, _) => const SchemesScreen()),
       GoRoute(path: '/ondc', builder: (_, _) => const OndcScreen()),
